@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import "antd/dist/antd.css";
 import { Form, Button, Select } from "antd";
@@ -52,7 +52,7 @@ const Department = (props) => {
       <StyledBody modal={props.modal}>
           {props.modal ?
             <>
-              <h1 style={{ marginTop: "-6rem" }}>마이페이지</h1>
+              <h1 style={{ marginTop: "-4rem" }}>마이페이지</h1>
             </>
             : <></>}
           <Form

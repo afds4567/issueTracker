@@ -6,19 +6,19 @@ import { SearchOutlined } from '@ant-design/icons';
 import Header from './header';
 import styled from 'styled-components';
 
-const topOptions = [
-  { label: 'topLeft', value: 'topLeft' },
-  { label: 'topCenter', value: 'topCenter' },
-  { label: 'topRight', value: 'topRight' },
-  { label: 'none', value: 'none' },
-];
+// const topOptions = [
+//   { label: 'topLeft', value: 'topLeft' },
+//   { label: 'topCenter', value: 'topCenter' },
+//   { label: 'topRight', value: 'topRight' },
+//   { label: 'none', value: 'none' },
+// ];
 
-const bottomOptions = [
-  { label: 'bottomLeft', value: 'bottomLeft' },
-  { label: 'bottomCenter', value: 'bottomCenter' },
-  { label: 'bottomRight', value: 'bottomRight' },
-  { label: 'none', value: 'none' },
-];
+// const bottomOptions = [
+//   { label: 'bottomLeft', value: 'bottomLeft' },
+//   { label: 'bottomCenter', value: 'bottomCenter' },
+//   { label: 'bottomRight', value: 'bottomRight' },
+//   { label: 'none', value: 'none' },
+// ];
 
 const HeaderWrapper = styled.div`
   padding: 0 8rem;
