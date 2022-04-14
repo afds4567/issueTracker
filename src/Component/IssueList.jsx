@@ -20,9 +20,7 @@ import styled from 'styled-components';
 //   { label: 'none', value: 'none' },
 // ];
 
-const HeaderWrapper = styled.div`
-  padding: 0 8rem;
-`
+
 
 
 
@@ -211,9 +209,7 @@ const List = () => {
   
   return (
     <> 
-      <HeaderWrapper>
-        <Header/>
-      </HeaderWrapper>
+      <Header/>
       <div style={{ padding: "3rem 8rem" }}>
         <h1>이슈 리스트</h1>
         <Table

@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { RedditOutlined , AppstoreTwoTone, OrderedListOutlined,UserOutlined,PlusCircleTwoTone } from '@ant-design/icons';
-import { Menu,Modal } from 'antd';
+import { Menu, Modal } from 'antd';
+import styled from 'styled-components';
 import Department from './Department';
+import { Route, Link } from 'react-router-dom';
 
+const HeaderWrapper = styled.div`
+  padding: 0 8rem;
+`
 const Header = () => {
     //헤더 메뉴 부분 : 보드, 이슈 리스트, 내 이슈, 이슈 만들기, 마이페이지 
     const [current, setCurrent] = useState("보드");
@@ -28,10 +33,12 @@ const Header = () => {
 
 
     return (
-        <Menu  onClick={handleClick} selectedKeys={[current]} mode="horizontal">
-            <Menu.Item key="보드" icon={<AppstoreTwoTone />}>
+        <HeaderWrapper>
+            <Menu  onClick={handleClick} selectedKeys={[current]} mode="horizontal">
+                <Link to= "/board"><Menu.Item key="보드" icon={<AppstoreTwoTone />}>
                 보드
-            </Menu.Item>
+                
+            </Menu.Item></Link>
             <Menu.Item key="이슈 리스트" icon={<OrderedListOutlined />} >
                 이슈 리스트
             </Menu.Item>
@@ -50,8 +57,9 @@ const Header = () => {
 				<Department modal changeModal={changeModal} />
             </Modal>
             
-        </Menu>
+            </Menu>
+        </HeaderWrapper>
     );
 }
     
-export default Header;
+export default Board;
