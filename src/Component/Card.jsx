@@ -1,11 +1,8 @@
 import { Card, Avatar,Button,Modal } from 'antd';
 import styled from "styled-components"
-import { EditOutlined, EllipsisOutlined, SettingOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import useAsync from './useAsync';
 import React, { useState } from 'react';
-import {Link} from "react-router-dom";
-import projectCreate from './Createprj';
 import CreatePrj from './Createprj';
 const { Meta } = Card;
 const StyledCard = styled(Card)`
