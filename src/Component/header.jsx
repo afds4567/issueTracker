@@ -62,4 +62,4 @@ const Header = () => {
     );
 }
     
-export default Board;
+export default Header;
