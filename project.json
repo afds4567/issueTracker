@@ -1,0 +1,39 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "title": "IT실",
+      "description": "IT실입니다."
+    },
+    {
+      "id": 2,
+      "title": "디자인팀",
+      "description": "디자인팀입니다."
+    },
+    {
+      "id": 3,
+      "title": "경영지원팀",
+      "description": "경영지원팀입니다."
+    },
+    {
+      "id": 4,
+      "title": "디자인팀",
+      "description": "디자인팀입니다"
+    },
+    {
+      "id": 6,
+      "title": "상품기획팀",
+      "description": "상품기획팀입니다"
+    },
+    {
+      "id": 7,
+      "title": "경영지원팀",
+      "description": "경영지원팀입니다"
+    },
+    {
+      "id": 9,
+      "title": "경영지원팀",
+      "description": "경영지원팀입니다"
+    }
+  ]
+}
