@@ -72,7 +72,7 @@ const Department = (props) => {
         >
           {props.modal ?
             <>
-              <div style={{marginTop:"4rem"}}>내 슬랙 ID</div>
+              <div style={{marginTop:"5rem"}}>내 슬랙 ID</div>
               <div style={{marginBottom:"2rem"}}>jiwon@dailyfunding.com</div>
             </>
             : <></>}

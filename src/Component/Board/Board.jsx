@@ -23,6 +23,17 @@ const dataset = {
 const Container = styled.div`
     display : flex;
 `
+const StickyBar = styled.div`
+	margin: 8px;
+	padding: 8px;
+    //border: 1px solid lightgrey;
+	font-weight: bold;
+    border-radius: 2px;
+    width:100%;
+    display:flex;
+    flex-direction: column;
+    background-color:white;
+`
 
 
 const Board = () => {
@@ -81,7 +92,17 @@ const Board = () => {
 	return (
 		<>
 			<Header />
-			<div style={{ padding: "3rem 8rem" }}>
+			<div style={{ padding: "0.5rem 8rem" }}>
+			<div style={{ display:"flex", margin:"8px"  }}>
+				{data.columnOrder.map((id, index) => {
+					const column = data.columns[id];
+					return <StickyBar>{column.title}</StickyBar>
+				 })}
+				</div>
+			</div>
+			<hr/>
+			<div style={{ padding: "0rem 8rem" }}>
+				<div style={{padding:"1px 16px 1px"}}>여신관리 본부</div>
 			<DragDropContext onDragEnd={handleOnDragEnd}>
 				<Droppable droppableId="all-columns" direction='horizontal' type='column'>
 					{(provided) => (
@@ -100,7 +121,7 @@ const Board = () => {
 					)}
 				</Droppable>
 				</DragDropContext>
-
+				<div style={{padding:"1px 16px 1px"}}>IT본부</div>
 				<DragDropContext onDragEnd={handleOnDragEnd}>
 				<Droppable droppableId="all-columns" direction='horizontal' type='column'>
 					{(provided) => (
@@ -108,7 +129,7 @@ const Board = () => {
 							{...provided.droppableProps}
 							ref={provided.innerRef}
 						>
-								{data.columnOrder2.map((id, index) => {
+								{data.columnOrder.map((id, index) => {
 									const column = data.columns[id];
 									const tasks = column.taskIds.map(taskId => data.tasks[taskId])
 									return <Column key={column.id} column={column} tasks={tasks} index={index} />

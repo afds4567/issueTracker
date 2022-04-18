@@ -39,8 +39,8 @@ async function getUsers() {
   return response.data;
 }
 const ProjectSelect = () => {
-	const [state, refetch] = useAsync(getUsers, []);
-	const { loading, data: users, error } = state
+	const [state] = useAsync(getUsers, []);
+	const {  data: users,  } = state
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const changeModal = () => {
 		setIsModalVisible(false);

@@ -5,7 +5,7 @@ import Task from './Task';
 
 const Container = styled.div`
     margin: 8px;
-    border: 1px solid lightgrey;
+    // border: 1px solid lightgrey;
     border-radius: 2px;
     width:100%;
     display:flex;
@@ -24,7 +24,7 @@ const TaskList = styled.div`
 export default function Column(props) {
   return (
 		<Container>
-			<Title>{props.column.title}</Title>
+			{/* <Title>{props.column.title}</Title> */}
 			<Droppable droppableId={props.column.id} type='task'>
 				{(provided, snapshot) => (
 					<TaskList
