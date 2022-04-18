@@ -49,7 +49,7 @@ const Header = () => {
 				</Menu.Item>
 				<Menu.Item  key="내 이슈" icon={<RedditOutlined />}>
 						{/* <a href="https://ant.design" target="_blank" rel="noopener noreferrer"> */}
-						내 이슈
+						<Link to= "/createIssue">내 이슈</Link>
 						{/* </a> */}
 				</Menu.Item>
 				<Menu.Item key="이슈 만들기" icon={<PlusCircleTwoTone twoToneColor="#eb2f96"/>} >
