@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import "antd/dist/antd.css";
 import { Form, Button, Select } from "antd";
-
+import { _user } from "../Recoil/atoms";
+import { useRecoilValue } from "recoil";
 const { Option } = Select;
 const provinceData = ['Seoul', 'Gangwon'];
 const cityData = {
@@ -22,13 +23,15 @@ const Department = (props) => {
   const [form] = Form.useForm();
   const [firstCity, setFirstCity] = useState("Seoul");
 	const [cities, setCities] = useState(cityData[provinceData[0]]);
-	const [secondCity, setSecondCity] = useState(cityData[provinceData[0]][0]);
+  const [secondCity, setSecondCity] = useState(cityData[provinceData[0]][0]);
+  const user = useRecoilValue(_user);
 	//등록 버튼 눌렀을 때 실행 
   const onFinish = (values) => {
     console.log("Success:", firstCity, secondCity);
+    console.log(user.name);
     props.changeModal();
   };
-
+  
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
 	};
@@ -49,7 +52,8 @@ const Department = (props) => {
 	// };
     return (
       <>
-      <StyledBody modal={props.modal}>
+        <StyledBody modal={props.modal}>
+          
           {props.modal ?
             <>
               <h1 style={{ marginTop: "-4rem" }}>마이페이지</h1>
@@ -118,7 +122,8 @@ const Department = (props) => {
               {props.modal ? "수정" : "등록"}
             </Button>
           </Form.Item>
-        </Form>
+          </Form>
+          <div>{user.name}</div>
       </StyledBody>
     </>
   );

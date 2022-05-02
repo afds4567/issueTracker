@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Comment, Avatar, Button, Input } from 'antd';
 import { useRecoilValue } from 'recoil';
-import { _user } from "../../atom";
+import { _user } from '../../Recoil/atoms';
 import Axios from "axios";
 const { TextArea } = Input;
 

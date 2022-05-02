@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import {  useRecoilValue } from 'recoil';
-import { _user } from "../../atom";
 import Axios from "axios";
 import SingleComment from "./SingleComment";
 import ReplyComment from './ReplyComment';
+import { _user } from '../../Recoil/atoms';
 
 function Comment(props) {
     const user = useRecoilValue(_user); 
@@ -16,10 +16,11 @@ function Comment(props) {
         event.preventDefault();
         const variables = {
         content: commentValue,
-        writer: user.firstName,
+        writer: user.lastName,
         postId: IssueId,
         };
-        Axios.post("http://localhost:3001/comment", variables).then((response) => {
+      Axios.post("http://localhost:3001/comment", variables)
+        .then((response) => {
             
             if (response.data) {
                 console.log(response.data);

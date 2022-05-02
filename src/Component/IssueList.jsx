@@ -1,11 +1,12 @@
 import { Table, Tag, Space, Input,Button,Modal } from 'antd';
-import { useState, useEffect,useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import tableData from '../TableData.json';
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from '@ant-design/icons';
 import Header from './header';
-import styled from 'styled-components';
-
+import { useRecoilValue } from 'recoil';
+import {isLoggedInRecoil} from '../Recoil/atoms';
 // const topOptions = [
 //   { label: 'topLeft', value: 'topLeft' },
 //   { label: 'topCenter', value: 'topCenter' },
@@ -39,7 +40,7 @@ const List = () => {
   const closeModal = () => {
     setIsModalVisible(false);
   };
-    //Table에서 검색 기능 
+  //Table에서 검색 기능 
   const getColumnSearchProps = dataIndex => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
       <div style={{ padding: 8 }}>
@@ -59,7 +60,7 @@ const List = () => {
             size="small"
             style={{ width: 90 }}
           >
-          Search
+            Search
           </Button>
           <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
             Reset
@@ -107,11 +108,11 @@ const List = () => {
     confirm();
     setState({
       searchText: selectedKeys[0],
-      searchedColumn:dataIndex,
+      searchedColumn: dataIndex,
     });
   };
     
-  function handleReset (clearFilters) {
+  function handleReset(clearFilters) {
     clearFilters();
     setState({ searchText: '' });
   };
@@ -120,92 +121,99 @@ const List = () => {
   useEffect(() => {
     setData(tableData);
     setCurrent(1);
-  },[] );
-  const onChangeHandler = (page,pageSize,filters,sorter) => {
+  }, []);
+  const onChangeHandler = (page, pageSize, filters, sorter) => {
     setCurrent(page);
   };
 
-    //Table Column 지정
+  //Table Column 지정
   const columns = [
-  {
-    title: 'id',
-    dataIndex: 'key',
-    key: 'id',
-  },
-  {
-    title: '요약',
-    dataIndex: '요약',
-    key: '요약',
-     ...getColumnSearchProps('요약'),
-    },
-  {
-    title: '상태',
-    key: 'tags',
-    dataIndex: 'tags',
-    filters: [
     {
-      text: '할 일',
-      value: '할 일',
+      title: 'id',
+      dataIndex: 'key',
+      key: 'id',
     },
     {
-      text: '진행중',
-      value: '진행중',
-      },
+      title: '요약',
+      dataIndex: '요약',
+      key: '요약',
+      ...getColumnSearchProps('요약'),
+    },
     {
-      text: '완료됨',
-      value: '완료됨',
+      title: '상태',
+      key: 'tags',
+      dataIndex: 'tags',
+      filters: [
+        {
+          text: '할 일',
+          value: '할 일',
+        },
+        {
+          text: '진행중',
+          value: '진행중',
+        },
+        {
+          text: '완료됨',
+          value: '완료됨',
+        }
+      ],
+      onFilter: (value, record) => record.tags.indexOf(value) === 0,
+      render: tags => (
+        <span>
+          {tags.map(tag => {
+            let color = tag === '진행중' ? 'geekblue' : 'green';
+            if (tag === '할 일') {
+              color = 'volcano';
+            }
+            return (
+              <Tag color={color} key={tag}>
+                {tag.toUpperCase()}
+              </Tag>
+            );
+          })}
+        </span>
+      ),
+    },
+    {
+      title: '기한',
+      dataIndex: 'dday',
+      key: 'dday',
+    },
+    {
+      title: '담당자',
+      dataIndex: '담당자',
+      key: '담당자',
+    },
+    {
+      title: '보고자',
+      dataIndex: '보고자',
+      key: '보고자',
+    },
+    {
+      title: '생성일',
+      dataIndex: '생성일',
+      key: '생성일',
+      sorter: (a, b) => a.생성일.localeCompare(b.생성일),
+      defaultSortOrder: 'descend',
+    },
+    // {
+    //   title: 'Action',
+    //   key: 'action',
+    //   render: (text, record) => (
+    //     <Space size="middle">
+    //       <a>Invite {record.요약}</a>
+    //       <a>Delete</a>
+    //     </Space>
+    //   ),
+    // },
+  ];
+  const isLoggedIn = useRecoilValue(isLoggedInRecoil);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/login');
     }
-    ],
-    onFilter: (value, record) => record.tags.indexOf(value) === 0,
-    render: tags => (
-      <span>
-        {tags.map(tag => {
-          let color = tag ==='진행중' ? 'geekblue' : 'green';
-          if (tag === '할 일') {
-            color = 'volcano';
-          }
-          return (
-            <Tag color={color} key={tag}>
-              {tag.toUpperCase()}
-            </Tag>
-          );
-        })}
-      </span>
-    ),
-  },
-  {
-    title: '기한',
-    dataIndex: 'dday',
-    key: 'dday',
-  },
-  {
-    title: '담당자',
-    dataIndex: '담당자',
-    key: '담당자',
-  },
-    {
-    title: '보고자',
-    dataIndex: '보고자',
-    key: '보고자',
-    },
-    {
-    title: '생성일',
-    dataIndex: '생성일',
-    key: '생성일',
-    sorter: (a, b) => a.생성일.localeCompare(b.생성일),
-    defaultSortOrder: 'descend',
-  },
-  // {
-  //   title: 'Action',
-  //   key: 'action',
-  //   render: (text, record) => (
-  //     <Space size="middle">
-  //       <a>Invite {record.요약}</a>
-  //       <a>Delete</a>
-  //     </Space>
-  //   ),
-  // },
-];
+  }, []);
   
   return (
     <> 
