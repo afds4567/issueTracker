@@ -3,7 +3,7 @@ import Header from "../header";
 import { DragDropContext, Droppable} from "react-beautiful-dnd";
 import styled from "styled-components";
 import Column from "./Column";
-
+import { _user } from "../../Recoil/atoms";
 const dataset = {
 	tasks: {
 		"task-1": { id: "task-1", content: "이슈 내용 1" },
@@ -36,7 +36,7 @@ const dataset = {
 		"column-12": { id: "column-12", title: "Completed", taskIds: ["task-12"] }
 	},
 	columnOrder: ["column-1", "column-2", "column-3", "column-4"],
-	columnOrder2: ["column-5", "column-6", "column-7", "column-8"],
+	columnOrder2: ["column-5", "column-6", "column-7"],
 	columnOrder3: ["column-9", "column-10", "column-11", "column-12"]
 };
 const Container = styled.div`

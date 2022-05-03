@@ -2,36 +2,38 @@ import React from "react";
 import axios from "axios";
 import { useRecoilState } from 'recoil';
 import { _user } from "../Recoil/atoms";
+import { cloneDeep } from 'lodash';
+import { useNavigate } from 'react-router';
 const OAuth2RedirectHandler = (props) => {
     //const dispatch = useDispatch();
     //axios.defaults.withCredentials = true;
     // 인가코드
   let code = new URL(window.location.href).searchParams.get("code");
-  const [user,setUser] = useRecoilState(_user);
+  const [user, setUser] = useRecoilState(_user);
+  const navigate = useNavigate();
     const sendKakaoTokenToServer = async (token ) => {
       axios.post('https://5723-221-148-180-175.ngrok.io/auth/slack',{access_token: token})
         .then(res => {
         console.log("post실행성공");
-        if (res.status == 201 || res.status == 200) {
-          setUser(oldData => [
-            ...oldData,
-            {
-              user_id: res.data.user_id,
-              name: res.data.name,
-            }
-            ])
+          if (res.status == 201 || res.status == 200) {
+            let clonedUser = cloneDeep(user);
+            clonedUser.name = res.data.name;
+            clonedUser.user_id = res.data.user_id;
+            setUser(clonedUser);
             console.log(res);
             window.localStorage.setItem("token", JSON.stringify({
             access_token: res.data.ACCESS_TOKEN
           })); 
-          
+          navigate(`/Department`);
           }
         else {
           window.alert("로그인에 실패하였습니다.");
         }
-      }).catch(function (error) {
+        })
+        .catch(function (error) {
         console.log(error);
-      })
+        })
+        
     }
     React.useEffect( () => {
         console.log("리다이렉트" + code);

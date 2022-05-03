@@ -1,5 +1,8 @@
 import React, { useEffect } from "react";
-import { useSearchParams } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
+import { _user,isLoggedInRecoil } from "../Recoil/atoms";
+import { cloneDeep } from 'lodash';
+import { useNavigate } from 'react-router';
 import queryString from 'query-string';
 import axios from 'axios';
 import styled from "styled-components";
@@ -42,62 +45,73 @@ class MyStateStore {
 }
 const myStateStore = new MyStateStore();
 const LoginSlack = (props) => {
-    const state = myStateStore.generate();
-    const slackauthURI=`https://slack.com/openid/connect/authorize?response_type=code&client_id=${clientId}&scope=${oidcScopes}&redirect_uri=${redirectUri}&nonce=${nonce}`;
-    const query = queryString.parse(window.location.search);
-    useEffect(() => {
-        if (query.code) {
-            console.log(query);
-            getAccessTokenHandler(query.code.toString());
-        }
-        
-        const jwttoken = localStorage.getItem("token");
-        const token = JSON.parse(jwttoken);
-        if (token) { const access = token.access_token;
-        // if (token && jwttoken) {
-            console.log(typeof(access));
-            axios.post('https://5723-221-148-180-175.ngrok.io/auth/ITS',null, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `${access}`
-                },
-            }).then((res) => { console.log(res);   })
-            }
-            
-        
-    }, []);
-    const getAccessTokenHandler = async (code) => {
-        const data = {
-            code,
-            client_id: `1652575731968.3442202545104`,
-            client_secret: `f738cca774454f8302a999dfc35a1231`,
-            grant_type: "authorization_code"
-        };
-        const queryString = Object.keys(data)
-        .map((k)=> encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
-            .join('&');
-        axios.post('https://slack.com/api/openid.connect.token', queryString, {
-            headers: {
-                'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
-            }
-        }).then((res) => {
-            console.log("success");
-        });
-        }
+	const state = myStateStore.generate();
+	const slackauthURI=`https://slack.com/openid/connect/authorize?response_type=code&client_id=${clientId}&scope=${oidcScopes}&redirect_uri=${redirectUri}&nonce=${nonce}`;
+	const query = queryString.parse(window.location.search);
+	const [user, setUser] = useRecoilState(_user);
+	const [isLogin,setIsLogin] = useRecoilState(isLoggedInRecoil);
+  const navigate = useNavigate();
+	useEffect(() => {
+		if (query.code) {
+			console.log(query);
+			getAccessTokenHandler(query.code.toString());
+		}
+		const jwttoken = localStorage.getItem("token");
+		const token = JSON.parse(jwttoken);
+		if (token) {
+			const access = token.access_token;
+			// if (token && jwttoken) {
+			console.log(typeof(access));
+			axios.post('https://5723-221-148-180-175.ngrok.io/auth/ITS',null, {
+				headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `${access}`
+				},
+			}).then((res) => {
+				let clonedUser = cloneDeep(user);
+				clonedUser.name = res.data.name;
+				clonedUser.user_id = res.data.user_id;
+				let clonedIsLogin = cloneDeep(isLogin);
+				clonedIsLogin= true;
+				setUser(clonedUser);
+				setIsLogin(clonedIsLogin);
+				console.log(clonedIsLogin);
+				console.log(isLogin);
+				navigate('/');
+			})
+		}       
+	}, []);
+	const getAccessTokenHandler = async (code) => {
+		const data = {
+			code,
+			client_id: `1652575731968.3442202545104`,
+			client_secret: `f738cca774454f8302a999dfc35a1231`,
+			grant_type: "authorization_code"
+		};
+		const queryString = Object.keys(data)
+		.map((k)=> encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
+			.join('&');
+		axios.post('https://slack.com/api/openid.connect.token', queryString, {
+			headers: {
+				'Content-type': 'application/x-www-form-urlencoded;charset=utf-8'
+			}
+		}).then((res) => {
+			console.log("success");
+		});
+	}
        
-    return (
-        <>
-            <StyledBody>
-            <a href={slackauthURI} style={{
-                alignIitems: "center", color: "#000", backgroundColor: "#fff", border: "1px solid #ddd"
-                , borderRadius: "4px", display: "inline-flex", fontFamily: "Lato, sans-serif", fontSize: "16px", fontWeight: "600",
-                height: "48px", justifyContent: "center", textDecoration: "none", width: "256px"
-            }}>
-                
-                <div style={{margin:"auto"}}><Slackbtn /><span>Sign in with Slack</span></div>
-                </a>
-            </StyledBody>
-        </>
+	return (
+		<>
+			<StyledBody>
+			<a href={slackauthURI} style={{
+				alignIitems: "center", color: "#000", backgroundColor: "#fff", border: "1px solid #ddd"
+				, borderRadius: "4px", display: "inline-flex", fontFamily: "Lato, sans-serif", fontSize: "16px", fontWeight: "600",
+				height: "48px", justifyContent: "center", textDecoration: "none", width: "256px"
+			}}>
+			<div style={{margin:"auto"}}><Slackbtn /><span>Sign in with Slack</span></div>
+			</a>
+			</StyledBody>
+		</>
   );
 }
 
