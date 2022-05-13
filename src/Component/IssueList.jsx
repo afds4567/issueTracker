@@ -7,23 +7,6 @@ import { SearchOutlined } from '@ant-design/icons';
 import Header from './header';
 import { useRecoilValue } from 'recoil';
 import {isLoggedInRecoil} from '../Recoil/atoms';
-// const topOptions = [
-//   { label: 'topLeft', value: 'topLeft' },
-//   { label: 'topCenter', value: 'topCenter' },
-//   { label: 'topRight', value: 'topRight' },
-//   { label: 'none', value: 'none' },
-// ];
-
-// const bottomOptions = [
-//   { label: 'bottomLeft', value: 'bottomLeft' },
-//   { label: 'bottomCenter', value: 'bottomCenter' },
-//   { label: 'bottomRight', value: 'bottomRight' },
-//   { label: 'none', value: 'none' },
-// ];
-
-
-
-
 
 const List = () => {
   const [top, setTop] = useState('none');
@@ -196,16 +179,6 @@ const List = () => {
       sorter: (a, b) => a.생성일.localeCompare(b.생성일),
       defaultSortOrder: 'descend',
     },
-    // {
-    //   title: 'Action',
-    //   key: 'action',
-    //   render: (text, record) => (
-    //     <Space size="middle">
-    //       <a>Invite {record.요약}</a>
-    //       <a>Delete</a>
-    //     </Space>
-    //   ),
-    // },
   ];
   const isLoggedIn = useRecoilValue(isLoggedInRecoil);
   const navigate = useNavigate();

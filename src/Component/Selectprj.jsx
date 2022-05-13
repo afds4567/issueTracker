@@ -4,6 +4,7 @@ import axios from 'axios';
 import useAsync from './useAsync';
 import React, { useState } from 'react';
 import CreatePrj from './Createprj';
+import Header from './header';
 const { Meta } = Card;
 const StyledCard = styled(Card)`
     padding: 1rem;
@@ -14,13 +15,14 @@ const StyledButton = styled(Button)`
     margin-top: 1rem;
 `
 const Wrapper = styled.div`
-    max-width: 1200px;
-    margin: 2rem auto;
-    
+    // max-width: 1200px;
+    // margin: 2rem auto;
+    padding: 0 8rem;
 `
 const Container = styled.div`
-  max-width: 1200px;
-  margin: 2rem auto;
+  // max-width: 1200px;
+  // margin: 2rem auto;
+	
   display: grid;
   grid-gap: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -32,15 +34,15 @@ const Title = styled.span`
     text-align: begin;
     `
 //project 정보 가져오는 async 함수
-async function getUsers() {
+async function getProjects() {
   const response = await axios.get(
-    'http://localhost:4000/data'
+    'https://b87c-221-148-180-175.ngrok.io/project'
   );
   return response.data;
 }
 const ProjectSelect = () => {
-	const [state] = useAsync(getUsers, []);
-	const {  data: users,  } = state
+	const [state] = useAsync(getProjects, []);
+	const {  data: projects,  } = state
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const changeModal = () => {
 		setIsModalVisible(false);
@@ -55,9 +57,12 @@ const ProjectSelect = () => {
 	const handleCancel = () => {
     	setIsModalVisible(false);
 	};
-	
+	const handleProjectSelect = () => {
+
+	}
 	return (
 		<>
+			<Header/>
 			<Wrapper>
 				<Title>프로젝트 선택</Title>
 				{/* <Link to="/Project/create"> */}
@@ -67,22 +72,24 @@ const ProjectSelect = () => {
 				</Modal>
 				{/* </Link> */}
 				<Container>
-					{users && users.map(user => (
-					<StyledCard
-					style={{  }}
-					key={user.id}
-					cover={
-					<img
-						alt="example"
-						src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
-						style={{marginBottom: "2rem"}}
-					/>
-					}
-					>
+					{projects && projects.map(user => (
+						<StyledCard
+						hoverable		
+						style={{  }}
+						key={user.project_id}
+						onClick={handleProjectSelect}	
+						cover={
+						<img
+							alt="example"
+							src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
+							style={{marginBottom: "2rem"}}
+						/>
+						}
+						>
 					<Meta
-						avatar={<Avatar src={(`https://joeschmoe.io/api/v1/${ user.id }`)} />}
-						title={user.title}
-						description={user && user.description}
+						avatar={<Avatar src={(`https://joeschmoe.io/api/v1/${ user.project_id }`)} />}
+						title={user.project_name}
+						description={user && `${user.project_name}팀에 요청하려는 내용을 입력해주세요.`}
 					/>
 					</StyledCard>
 					))}

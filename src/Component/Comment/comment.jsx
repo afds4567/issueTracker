@@ -19,7 +19,7 @@ function Comment(props) {
         writer: user.lastName,
         postId: IssueId,
         };
-      Axios.post("http://localhost:3001/comment", variables)
+      Axios.post("http://localhost:4000/comment", variables)
         .then((response) => {
             
             if (response.data) {

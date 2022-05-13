@@ -1,5 +1,5 @@
 import React, { useState,useEffect} from 'react';
-import { RedditOutlined , AppstoreTwoTone, OrderedListOutlined,UserOutlined,PlusCircleTwoTone } from '@ant-design/icons';
+import { RedditOutlined , AppstoreTwoTone, OrderedListOutlined,UserOutlined,PlusCircleTwoTone,FolderOpenTwoTone } from '@ant-design/icons';
 import { Menu, Modal } from 'antd';
 import styled from 'styled-components';
 import Department from './Department';
@@ -55,6 +55,11 @@ const Header = () => {
 				<Menu.Item key="이슈 만들기" icon={<PlusCircleTwoTone twoToneColor="#eb2f96"/>} >
 					<Link to= "/createIssue">이슈 만들기</Link>
 				</Menu.Item>
+
+				<Menu.Item key="프로젝트 선택" icon={<FolderOpenTwoTone twoToneColor="#52c41a"/>} >
+					<Link to= "/project">프로젝트 선택</Link>
+				</Menu.Item>
+
 				<Menu.Item onClick={showModal} style={{ marginLeft: 'auto' }} key="마이페이지" icon={<UserOutlined />}>
 					마이페이지
 				</Menu.Item>

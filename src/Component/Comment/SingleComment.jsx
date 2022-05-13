@@ -23,7 +23,7 @@ function SingleComment(props) {
         postId: props.postId,
         responseTo: props.comment.id,
         };
-        Axios.post("http://localhost:3001/comment", variables).then((response) => {
+        Axios.post("http://localhost:4000/comment", variables).then((response) => {
             
             if (response.data) {
                 console.log(response.data);

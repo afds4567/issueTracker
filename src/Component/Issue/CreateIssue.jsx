@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState,useRef } from "react";
 import MainHeader from "../header";
 import styled from "styled-components";
-import { InboxOutlined } from '@ant-design/icons';
-import { Layout ,Avatar, Tag, Input, Icon,Form, DatePicker, Select,Upload, message} from 'antd';
-const { TextArea } = Input;
+import QuillEditor from "../editor/QuillEditor";
+import { InboxOutlined,BellTwoTone} from '@ant-design/icons';
+import { Layout ,Avatar, Tag, Input, Icon,Form, DatePicker, Select,Upload, message,Button} from 'antd';
+import Api from "../../network/api";
+import Testview from "../Comment/Testview";
+// const { TextArea } = Input;
 const { Dragger } = Upload;
 const { Header, Footer, Sider, Content } = Layout;
 const { Option } = Select;
@@ -16,34 +19,53 @@ const OwnerData = {
 const Priority = ['긴급', '보통', '낮음'];
 
 const StyledLayout = styled(Layout)`
-  	background-color:grey;
+	background-color:#f3f3f3;
+	height:100vh;
+	
+	padding: 0rem 8rem;
 `
 const StyledHeader = styled(Header)`
 	padding: 0 8rem;
 	line-height: 3rem;
 	height : 3rem;
-	align-items: center;
 	justify-content: center;
 	background-color:#f3f3f3;
 `
+const WriterWrapper = styled.div`
+	display:flex;
+	flex-direction:row;
+	align-items: center;
+	box-sizing:border-box;
+`
 const StyledContent = styled(Content)`
-	padding-left: 8rem;
-	line-height: 3rem;
-	height : 3rem;
-	width: 70%
+	line-height: 1rem;
+	height : 50vh;
+	overflow:scroll;
+	overflow-x: hidden;
+	width: 70%;
+	background-color: #fff;
+	height:100%;
+	padding: 1.5rem  1.5rem;
 `
 const StyledItem = styled(Form.Item)`
-	margin-bottom: 0;
-	padding:0 12px;
+	margin-top: -1rem;
+	padding:0 0.5rem;
 	margin-top:1rem;
 `
-	
-
 const StyledSider = styled(Sider)`
-	padding-right: 8rem;
-	line-height: 3rem;
-	height : 3rem;
-	width: 30%;
+	background: #F3F3F3;
+`
+const SiderWrapper = styled.div`
+	padding: 20px 20px;
+	background-color: #FFFFFF;
+	height:100%
+`
+const SiderItemWrapper = styled.div`
+	marginTop:2rem;
+	borderRadius:5px;
+	height:auto;
+	border:1px solid #d9d9d9;
+	background-color: rgb(242 242 242 / 25%);
 `
 const StyledFooter = styled(Footer)`
 	padding: 2rem 8rem;
@@ -57,7 +79,10 @@ const CreateIssue = () => {
 	const [secondCity, setSecondCity] = useState(OwnerData[CategoryData[0]][0]);
 	const [priorities, setPriorities] = useState(Priority);
 	const [priority, setPriority] = useState(priorities[0]);
-	const [descript, setDescript] =useState("");
+	const [descript, setDescript] = useState("");
+	const [subscribe, setSubscribe] = useState(false);
+	const [htmlContent, setHtmlContent] = useState("");
+	 const quillRef = useRef();
   const onChange = e => {
   console.log('Change:', e.target.value);
 	};
@@ -75,35 +100,46 @@ const CreateIssue = () => {
 	};
 	const onDate=(date, dateString)=> {
   	console.log(date, dateString);
-}
+	}
+	const handleButton = () => {
+		setSubscribe(!subscribe);
+	}
+	const props = {
+  name: 'file',
+  multiple: true,
+  action: 'http://localhost:5555/uploads',
+  onChange(info) {
+    const { status } = info.file;
+    if (status !== 'uploading') {
+      console.log(info.file, info.fileList);
+    }
+    if (status === 'done') {
+      message.success(`${info.file.name} file uploaded successfully.`);
+    } else if (status === 'error') {
+      message.error(`${info.file.name} file upload failed.`);
+    }
+  },
+  onDrop(e) {
+    console.log('Dropped files', e.dataTransfer.files);
+  	},
+	};
+	const api = new Api();
   return (
 		<>
 			<MainHeader />
 			
 			<StyledLayout >
-				<StyledHeader>
-					<span style={{ paddingLeft: '20px' }}>작성자:</span> <Avatar src="https://joeschmoe.io/api/v1/random" /> 하지원
-				</StyledHeader>
-				{/* <Layout>
+				<StyledHeader/>
+				<Layout>
 					<StyledContent>
-						<div>요약</div> 
-						<StyledInput showCount maxLength={20} onChange={onChange} />
-					</StyledContent>
-					<StyledSider>Sider<StyledInput showCount maxLength={20} onChange={onChange} /></StyledSider>
-				</Layout> */}
-
-				<Layout style={{ background: '#f3f3f3',padding: '0 8rem'}}>
-					<StyledContent style={{background: '#fff', minHeight: '70vh', padding: '0px 20px'}}>
-							<div>요약</div>
-							<Input showCount maxLength={20} onChange={onChange} />
-
-							<TextArea
-								value={descript}
-								onChange={onChange}
-								placeholder="Controlled autosize"
-								autoSize={{ minRows: 3, maxRows: 5 }}
-        			/>
-							<Dragger style={{height: "20px"}} >
+						<WriterWrapper><div style={{ fontWeight: "bold" }}>Created by</div><Avatar style={{ padding: "3px", marginLeft: "10px" }} src="https://joeschmoe.io/api/v1/random" /> 하지원</WriterWrapper>
+						
+						<Input showCount maxLength={20} onChange={onChange} placeholder={"요약"} />
+						
+						<QuillEditor quillRef={quillRef} htmlContent={htmlContent} setHtmlContent={setHtmlContent} api={api} />
+						
+						<div style={{marginTop:'3rem'}}>첨부파일
+							<Dragger {...props} >
 								<p className="ant-upload-drag-icon">
 									<InboxOutlined />
 								</p>
@@ -113,54 +149,80 @@ const CreateIssue = () => {
 									band files
 								</p>
 							</Dragger>
+						</div>
+						<Testview/>
 					</StyledContent>
 					
-					<Sider style={{ background: '#F3F3F3',}}>
-							<div style={{ padding: '12px 20px', backgroundColor: '#FFFFFF',height:'100%' }}>
-								<div style={{ borderRadius:'5px', border:'1px solid #d9d9d9',backgroundColor: 'rgb(242 242 242 / 25%)',height:'100%'}}>
-									<StyledItem>
-										<div>카테고리</div>
-										<Select defaultValue={CategoryData[0]} onChange={handleProvinceChange} >
-											{CategoryData.map(province => (
-											<Option key={province}>{province}</Option>
-											))}
-										</Select>
-									</StyledItem>
-
-									<StyledItem >
-										<div>담당자</div>
-										<Select value={secondCity} onChange={onSecondCityChange}>
-											{cities.map(city => (
-											<Option key={city}>{city}</Option>
+					<StyledSider>
+						<SiderWrapper>
+							<SiderItemWrapper>
+								<StyledItem>
+									<div>카테고리</div>
+									<Select defaultValue={CategoryData[0]} onChange={handleProvinceChange} >
+										{CategoryData.map(province => (
+										<Option key={province}>{province}</Option>
 										))}
-										</Select>
-									</StyledItem>
-									
-									<StyledItem >
-										<div>우선순위</div>
-										<Select value={priority} onChange={onPriorityChange}>
-											{priorities.map(priority => {
-												let color = priority ==='보통' ? 'yellow' : 'green';
-												if (priority === '긴급') {
-													color = 'volcano';
-												}
-												return(
-													<Option key={priority}><Tag color={color}>{priority}</Tag></Option>
-												)
-										})}
-										</Select>
+									</Select>
+								</StyledItem>
+
+								<StyledItem >
+									<div>담당자</div>
+									<Select value={secondCity} onChange={onSecondCityChange}>
+										{cities.map(city => (
+										<Option key={city}>{city}</Option>
+									))}
+									</Select>
 								</StyledItem>
 								
 								<StyledItem >
-										<div>예상 기한</div>
-									<DatePicker onChange={onDate} />
-									</StyledItem>
-									</div>
-						</div>
-					</Sider>
+									<div>우선순위</div>
+									<Select value={priority} onChange={onPriorityChange}>
+										{priorities.map(priority => {
+											let color = priority ==='보통' ? 'yellow' : 'green';
+											if (priority === '긴급') {
+												color = 'volcano';
+											}
+											return(
+												<Option key={priority}><Tag color={color}>{priority}</Tag></Option>
+											)
+									})}
+									</Select>
+							</StyledItem>
+							
+							<StyledItem >
+									<div>예상 기한</div>
+								<DatePicker onChange={onDate} />
+							</StyledItem>
+							
+							<StyledItem >
+								<div>비슷한 이슈</div>
+								<Select
+									showSearch
+									placeholder="다른 이슈 검색"
+									optionFilterProp="children"
+									filterOption={(input, option) =>
+										option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+									}
+								>
+									<Option value="jack">Jack</Option>
+									<Option value="lucy">Lucy</Option>
+									<Option value="tom">Tom</Option>
+								</Select>
+							</StyledItem>
+							<StyledItem style={{marginBottom:'2rem'}}>
+								<div style={{display:"flex",alignItems: "center",justifyContent:"space-between"}}>
+									<div>구독하기</div>
+									{subscribe? <Button onClick={handleButton} shape ="circle" icon={<BellTwoTone twoToneColor="#d3cf53"/> }></Button>: 
+									<Button onClick={handleButton} shape ="circle" icon={<BellTwoTone twoToneColor="grey"/> }></Button>}
+								</div>
+							</StyledItem>
+							
+								</SiderItemWrapper>
+					</SiderWrapper>
+					</StyledSider>
         
       </Layout>
-				<StyledFooter style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</StyledFooter>
+				<StyledFooter/>
 				</StyledLayout>
 				
 		</>
