@@ -1,25 +1,56 @@
-import { Table, Tag, Space, Input,Button,Modal } from 'antd';
+import { Table, Tag, Space, Input,Button } from 'antd';
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import tableData from '../TableData.json';
+import { useNavigate, useParams } from 'react-router-dom';
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from '@ant-design/icons';
 import Header from './header';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue,useRecoilState } from 'recoil';
 import {isLoggedInRecoil} from '../Recoil/atoms';
-
+import axios from "axios";
+import useAsync from './useAsync';
+import {aprojectid} from '../Recoil/atoms';
+async function getIssue(projectId) {
+  const response = await axios.get(
+    `https://6007-221-148-180-175.ngrok.io/project/${projectId}`
+    //'https://6e54f48d-b34e-497e-bf72-69aaffd4d747.mock.pstmn.io'
+  );
+  var issues = [];
+  console.log(response.data);
+  response.data.boards.map((i) => (i.issue.map((j) => { j['status'] = i.title; issues.push(j); })));
+  console.log(issues);
+  return issues;
+}
+  
 const List = () => {
+  const { projectId } = useParams();
   const [top, setTop] = useState('none');
   const [bottom, setBottom] = useState('bottomCenter');
-  const [data, setData] = useState(tableData);
+  const [data, setData] = useState([
+    // {
+    //   issue_id: "",
+    //   title: "",
+    //   reporter: "",
+    //   assignee: "[]",
+    //   content: "",
+    //   deadline: "",
+    //   priority: "",
+    //   created_at: "",
+    //   updated_at: "",
+    //   board: ""
+    // }
+  ]);
+  
+  const [currentpid, setProjectid] = useRecoilState(aprojectid);
   const [current, setCurrent] = useState(1);
   const [searchText, setSearchText] = useState('');
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
-  const [state, setState] = useState({ searchText: '', searchedColumn: '' })
+  const [states, setState] = useState({ searchText: '', searchedColumn: '' })
   //Table에서 더블클릭시 모달 출력
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeRecord, setActiveRecord] = useState(null);
+  const [state] = useAsync(() => getIssue(projectId), []);
+  const {loading,data:issue,error} = state;
   const closeModal = () => {
     setIsModalVisible(false);
   };
@@ -101,10 +132,6 @@ const List = () => {
   };
   //검색 기능 끝
 
-  useEffect(() => {
-    setData(tableData);
-    setCurrent(1);
-  }, []);
   const onChangeHandler = (page, pageSize, filters, sorter) => {
     setCurrent(page);
   };
@@ -113,80 +140,91 @@ const List = () => {
   const columns = [
     {
       title: 'id',
-      dataIndex: 'key',
+      dataIndex: 'issue_id',
       key: 'id',
     },
     {
       title: '요약',
-      dataIndex: '요약',
+      dataIndex: 'title',
       key: '요약',
-      ...getColumnSearchProps('요약'),
+      ...getColumnSearchProps('title'),
     },
-    {
-      title: '상태',
-      key: 'tags',
-      dataIndex: 'tags',
-      filters: [
-        {
-          text: '할 일',
-          value: '할 일',
-        },
-        {
-          text: '진행중',
-          value: '진행중',
-        },
-        {
-          text: '완료됨',
-          value: '완료됨',
-        }
-      ],
-      onFilter: (value, record) => record.tags.indexOf(value) === 0,
-      render: tags => (
-        <span>
-          {tags.map(tag => {
-            let color = tag === '진행중' ? 'geekblue' : 'green';
-            if (tag === '할 일') {
-              color = 'volcano';
-            }
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
-        </span>
-      ),
-    },
+    // {
+    //   title: '우선순위',
+    //   key: 'priority',
+    //   dataIndex: 'priority',
+    //   filters: [
+    //     {
+    //       text: '긴급',
+    //       value: 'F',
+    //     },
+    //     {
+    //       text: '보통',
+    //       value: 'M',
+    //     },
+    //     {
+    //       text: '여유',
+    //       value: 'S',
+    //     }
+    //   ],
+    //   onFilter: (value, record) => record.priority.indexOf(value) === 0,
+    //   render: (priority) => {
+    //     let color = (priority === 'M') ? 'geekblue' : 'green';
+    //     if (priority === 'F') {
+    //       color = 'volcano';
+    //       console.log(color)
+    //     }
+    //     return (
+    //       <Tag color={color} key={priority}>
+    //         {priority==='F'?'긴급': (priority==='M'?"보통":"여유")}
+    //       </Tag>
+    //     )
+    //   }
+    // },
     {
       title: '기한',
-      dataIndex: 'dday',
+      dataIndex: 'deadline',
       key: 'dday',
+      sorter: (a, b) => a.deadline.localeCompare(b.deadline),
+      defaultSortOrder: 'descend',
     },
     {
       title: '담당자',
-      dataIndex: '담당자',
-      key: '담당자',
+      dataIndex: "assignee",
+      render: (assignee) => { const ans = assignee.filter(a => a.mension === false).map(a=>a.user+" "); console.log(ans); return ans },
+      key: "assignee"
+      
     },
     {
       title: '보고자',
-      dataIndex: '보고자',
+      dataIndex: 'reporter',
       key: '보고자',
     },
-    {
-      title: '생성일',
-      dataIndex: '생성일',
-      key: '생성일',
-      sorter: (a, b) => a.생성일.localeCompare(b.생성일),
-      defaultSortOrder: 'descend',
-    },
+    // {
+    //   title: '생성일',
+    //   dataIndex: '생성일',
+    //   key: '생성일',
+    //   sorter: (a, b) => a.생성일.localeCompare(b.생성일),
+    //   defaultSortOrder: 'descend',
+    // },
   ];
+  
   const isLoggedIn = useRecoilValue(isLoggedInRecoil);
   const navigate = useNavigate();
+  
   useEffect(() => {
+    (async () => {
+      console.log(currentpid)
+      setProjectid(projectId);
     if (!isLoggedIn) {
-      navigate('/login');
-    }
-  }, []);
+      //navigate('/login');
+      setCurrent(1);
+      const response = await getIssue(projectId);
+      setData([...response]);
+      console.log("check", [...response]);
+      
+    }})();
+  }, [projectId]);
   
   return (
     <> 
@@ -194,33 +232,36 @@ const List = () => {
       <div style={{ padding: "3rem 8rem" }}>
         <h1>이슈 리스트</h1>
         <Table
-            style={{border:"1px solid #f0f0f0"}}
-            columns={columns}
-            pagination={{
-                position: [top, bottom],
-                defaultPageSize: 10,
-                onChange: onChangeHandler,
-                current
-            }}
-            dataSource={data}
+          style={{border:"1px solid #f0f0f0"}}
+          columns={columns}
+          pagination={{
+              position: [top, bottom],
+              defaultPageSize: 10,
+              onChange: onChangeHandler,
+              current
+          }}
+          dataSource={data}
           total={data.length}
+          rowKey={record => record.issue_id}
           onRow={(record) => {
-          return {
+            return {
+            
             onDoubleClick: () => {
-              setActiveRecord(record);
-              setIsModalVisible(true);
+              navigate(`/issue/${record.issue_id}`);
+              // setActiveRecord(record);
+              // setIsModalVisible(true);
             },
           };
         }}
         />
-        <Modal
+        {/* <Modal
         title="이슈 디테일"
         visible={isModalVisible}
         onCancel={closeModal}
         footer={null}
       >
         {/* render whatever you want based on your record */}
-        <p>요약: {activeRecord?.요약} </p>
+        {/* <p>요약: {activeRecord?.요약} </p>
         <p>설명: 에디터툴적용보안 </p>
         <p>카테고리: </p>
         <p>댓글 : antd 멘션 사용 </p>
@@ -229,7 +270,7 @@ const List = () => {
         <p>진행상태: {activeRecord?.tags} </p>
         <p>우선순위:  </p>
         <p>기한: {activeRecord?.dday} </p>
-      </Modal>
+      //</Modal> */}
       </div>
     </>
   );

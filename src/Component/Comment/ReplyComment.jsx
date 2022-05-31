@@ -8,7 +8,7 @@ function ReplyComment(props) {
         let commentNumber = 0;
 
         props.commentLists.map((comment) => {
-            if (comment.responseTo === props.parentCommentId) {
+            if (comment.parent === props.parentCommentId) {
                 commentNumber++;
             }
         })
@@ -19,10 +19,10 @@ function ReplyComment(props) {
         props.commentLists.map((comment, index) => (
             <>  
                 {
-                    comment.responseTo === parentCommentId && (
+                    comment.parent === parentCommentId && (
                     <div style={{width:'80%',marginLeft:'40px'}}>
                         <SingleComment refreshFunction={props.refreshFunction} comment={comment} postId={props.postId} />
-                        <ReplyComment refreshFunction={props.refreshFunction} parentCommentId={comment.id} commentLists={props.commentLists} postId={props.postId}/>
+                        <ReplyComment refreshFunction={props.refreshFunction} parentCommentId={comment.comment_id} commentLists={props.commentLists} postId={props.postId}/>
                         </div>
                     )
                 }

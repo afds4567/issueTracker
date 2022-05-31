@@ -4,9 +4,11 @@ import { Menu, Modal } from 'antd';
 import styled from 'styled-components';
 import Department from './Department';
 import { Link,useLocation } from 'react-router-dom';
-
+import { aprojectid } from '../Recoil/atoms';
+import { useRecoilValue,useRecoilState } from 'recoil';
 const HeaderWrapper = styled.div`
   padding: 0 8rem;
+	background-color: #fff200;
 `
 const Header = () => {
 	//헤더 메뉴 부분 : 보드, 이슈 리스트, 내 이슈, 이슈 만들기, 마이페이지 
@@ -15,8 +17,10 @@ const Header = () => {
 	// const handleClick = e => {
 	// 	console.log('click ', e);
 	// };
+	const PID = useRecoilValue(aprojectid);
 	useEffect(() => {
 		setCurrent(pathname.substring(1));
+		
 	}, [pathname]);
 	//모달창 부분
 	const [isModalVisible, setIsModalVisible] = useState(false);
@@ -35,15 +39,15 @@ const Header = () => {
 
 
 	return (
-		<HeaderWrapper>
-			<Menu selectedKeys={[current]} mode="horizontal">
+		<HeaderWrapper style={{position: "sticky", backgroundColor: "#fff200", top:"0", zIndex:"999"}}>
+			<Menu selectedKeys={[current]} mode="horizontal" style={{position: "sticky", backgroundColor: "#fff200", top:"0"}}>
 				<Menu.Item key="board" icon={<AppstoreTwoTone />}>
-					<Link to= "/board">
+					<Link to={`/board/${PID}`}>
 						보드
 					</Link>
 				</Menu.Item>
 				<Menu.Item key="" icon={<OrderedListOutlined />} >
-					<Link to= "/">
+					<Link to={`/project/${PID}`}>
 						이슈 리스트
 					</Link>
 				</Menu.Item>

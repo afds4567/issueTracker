@@ -5,44 +5,40 @@ import { Form, Button, Select,Input } from "antd";
 import axios from "axios";
 import { useNavigate } from 'react-router';
 
+async function getProjects() {
+    const response = await axios.get(
+    'https://682a-221-148-180-175.ngrok.io/project'
+    );
+    return response.data;
+}
+  
 export default function CreatePrj(props) {
-    async function getUsers() {
-        const response = await axios.get(
-        'https://5723-221-148-180-175.ngrok.io/project'
-        );
-        return response.data;
-  }
-    const [projects, setProject] = useAsync(getUsers, []);
-    const [dep,setDep] = useState("");
-    const [choice,setChoice] =useState('');
-    const navigate = useNavigate();
-    const [form] = Form.useForm();
-    const onFinish = (values) => {
-    console.log("Success:", values);
-    };
-    const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+  const [projects, setProject] = useAsync(getProjects, []);
+  const [dep,setDep] = useState("");
+  const [choice,setChoice] =useState('');
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const onFinish = (values) => {
+  console.log("Success:", values);
+  };
+  const onFinishFailed = (errorInfo) => {
+  console.log("Failed:", errorInfo);
   };
 
   function onSubmit(e) {
     e.preventDefault();
     props.changeModal();
     console.log(projects.data.length); 
-    fetch("https://5723-221-148-180-175.ngrok.io/project", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },  //요청 헤더
-        body: JSON.stringify({
-            project_id: projects.data.length + 1,
-            project_name: dep,
-            board_type: choice
-        }),
-    }).then((res) => {
-        if (res.ok) {
-            alert("성공적으로 추가되었습니다.");
-            navigate("/project");
-        }
+    axios.post('https://682a-221-148-180-175.ngrok.io/project/', {
+      project_id: projects.data.length + 1,
+      project_name: dep,
+      board_type: choice
+    })
+    .then((res) => {
+      if (res.ok) {
+        alert("성공적으로 추가되었습니다.");
+        navigate(`/project/${projects.data.length+1}`);
+      }
     });
   }
   function handleTypeChange(value) {

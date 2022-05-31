@@ -15,7 +15,7 @@ const StyledBody = styled.body`
   justify-content: center;
   align-items: center;
   font-family: 'Lato', sans-serif;
-  background-color: white;
+  background-color: #ef5777;
   flex-direction: column;
 `
 
@@ -23,7 +23,7 @@ const nonce = "your-own-nonce-value";
 const clientId = `1652575731968.3442202545104`;
 const clientSecret = `f738cca774454f8302a999dfc35a1231`;
 const oidcScopes = "openid,email,profile"; // openid is required at least
-const redirectUri = `https://ba65-221-148-180-175.ngrok.io/slack/oauth_redirect`;
+const redirectUri = `https://dc12-221-148-180-175.ngrok.io/slack/oauth_redirect`;
 
 class MyStateStore {
   constructor() {
@@ -58,28 +58,28 @@ const LoginSlack = (props) => {
 		}
 		const jwttoken = localStorage.getItem("token");
 		const token = JSON.parse(jwttoken);
-		if (token) {
-			const access = token.access_token;
-			// if (token && jwttoken) {
-			console.log(typeof(access));
-			axios.post('https://b87c-221-148-180-175.ngrok.io/auth/ITS',null, {
-				headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `${access}`
-				},
-			}).then((res) => {
-				let clonedUser = cloneDeep(user);
-				//clonedUser.name = res.data.name;
-				clonedUser.user_id = res.data.username;
-				let clonedIsLogin = cloneDeep(isLogin);
-				clonedIsLogin= true;
-				setUser(clonedUser);
-				setIsLogin(clonedIsLogin);
-				console.log(clonedIsLogin);
-				console.log(isLogin);
-				navigate('/');
-			})
-		}       
+		// if (token) {
+		// 	const access = token.access_token;
+		// 	// if (token && jwttoken) {
+		// 	console.log(typeof(access));
+		// 	axios.post('https://682a-221-148-180-175.ngrok.io/auth/ITS',null, {
+		// 		headers: {
+		// 				'Content-Type': 'application/json',
+		// 				'Authorization': `${access}`
+		// 		},
+		// 	}).then((res) => {
+		// 		let clonedUser = cloneDeep(user);
+		// 		//clonedUser.name = res.data.name;
+		// 		clonedUser.user_id = res.data.username;
+		// 		let clonedIsLogin = cloneDeep(isLogin);
+		// 		clonedIsLogin= true;
+		// 		setUser(clonedUser);
+		// 		setIsLogin(clonedIsLogin);
+		// 		console.log(clonedIsLogin);
+		// 		console.log(isLogin);
+		// 		navigate('/');
+		// 	})
+		// }       
 	}, []);
 	const getAccessTokenHandler = async (code) => {
 		const data = {

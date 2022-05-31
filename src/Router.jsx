@@ -1,11 +1,11 @@
 import { Route, Routes } from "react-router-dom";
 import './App.css';
 import Department from './Component/Department';
-import Login from './Component/Login';
 import Card from './Component/Selectprj';
 import IssueList from './Component/IssueList';
 import Board from "./Component/Board/Board";
 import CreateIssue from "./Component/Issue/CreateIssue";
+import ViewIssue from "./Component/Issue/ViewIssue";
 import LoginSlack from "./Component/Slack";
 import OAuth2RedirectHandler from "./Component/OAuth2RedirectHandler";
 import Testview from "./Component/Comment/Testview";
@@ -17,11 +17,12 @@ function Router() {
         <Route path="/slack/oauth_redirect" element={<OAuth2RedirectHandler />} />
         
         <Route path="/project" element={<Card />} />
-        <Route path="/project/:projectId" element={<Card />} />
+        <Route path="/project/:projectId" element={<IssueList />} />
         <Route path="/Department" element={<Department />} />
         <Route path="/" element={<IssueList/>} />
-        <Route path="/board" element={<Board />} />
+        <Route path="/board/:projectId" element={<Board />} />
         <Route path="/createIssue" element={<CreateIssue />} />
+        <Route path="/issue/:issueId" element={<ViewIssue />} />
         <Route path="/comment" element={<Testview />} />
       </Routes>
     </div>

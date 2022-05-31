@@ -8,7 +8,6 @@ import { _user,isLoggedInRecoil } from "../Recoil/atoms";
 import { useRecoilValue } from "recoil";
 import axios from "axios";
 import { useRecoilState } from "recoil";
-const { Option } = Select;
 const StyledBody = styled.body`
   height: ${(props) => (props.modal ? "60vh" : "100vh")};
   display: flex;
@@ -18,88 +17,63 @@ const StyledBody = styled.body`
   background-color: white;
   flex-direction: column;
 `
+const onSilentRefresh = (refreshtoken) => {
+  axios.post('/token/verify/', { token:refreshtoken})
+    .then(onLoginSuccess)
+    .catch(error => {
+        console.log(error);
+    });
+}
+const onLoginSuccess = response => {
+  const { access_token, exp, refresh_token } = response.data;
+   window.localStorage.setItem("token", JSON.stringify({
+    refresh_token: refresh_token,
+    access_token: access_token,
+  }));
+  axios.defaults.headers.common['Authorization'] = "JWT " + access_token;
+  setTimeout(function(){onSilentRefresh(refresh_token)}, exp*1000 - 30000);
+}
 const Department = (props) => {
   const [form] = Form.useForm();
-  const [department, setDepartment] = useState([]);
-  const [city,setCity] = useState({});
-  const [firstCity, setFirstCity] = useState("");
-  const [cities, setCities] = useState("");
-  const [secondCity, setSecondCity] = useState("");
   const [email,setEmail] = useState("");
   const user = useRecoilValue(_user);
   const [login,setLogin] = useRecoilState(isLoggedInRecoil)
   const navigate = useNavigate();
-  // useEffect(() => {
-  //   const tmpdepart = [];
-  //   const tmpcity = {};
-  //   axios.get(`https://5723-221-148-180-175.ngrok.io/dept`)
-  //     .then(async(res) => {
-  //       console.log(res);
-  //       for (let i = 0; i < res.data.length; i++) {
-  //         const depname = res.data[i].dept_name;
-  //         tmpdepart.push(depname);
-  //         let tmp=[];
-  //         for (let j = 0;j<res.data[i].responsibleIssue.length;j++) {
-  //           tmp.push(res.data[i].responsibleIssue[j].responsible_issue_name);
-  //         }
-  //         tmpcity[depname]  = tmp;
-  //       }
-  //     })
-  //     .finally(async() => {
-  //       setDepartment(tmpdepart);
-  //       setCity(tmpcity);
-  //     });
-  // }, []);
   //등록 버튼 눌렀을 때 실행
   const onFinish = (values) => {
-    console.log("Success:", firstCity, secondCity);
-    console.log((secondCity));
-    console.log(user.name + email);
-    //const updateData = { "email":email, "responsibleIssue": { "responsible_issue_name" : secondCity,"department":{"dept_name":firstCity} }};
-    const updateData = { "email":email};
-    axios.put(`https://b87c-221-148-180-175.ngrok.io/signUp/${user.user_id}`, updateData)
+    const updateData = { "email": email };
+    //const access_token =JSON.parse(window.localStorage.getItem("token")).access_token;
+    //console.log(access_token);
+    // if (window.localStorage.getItem("token")) {
+    //   const access_token = JSON.parse(window.localStorage.getItem("token")).access_token;
+    //   axios.defaults.headers.common['Authorization'] = `JWT ${access_token}`
+    // }
+    //console.log(access_token);
+    axios.put(`https://6007-221-148-180-175.ngrok.io/signUp/${user.user_id}`, updateData)
     .then(response => {
-      console.log(response.data + "회원등록성공~ tokenobtain 성공");
-     // user_id: user.user_id, name: user.name
-      axios.post('https://b87c-221-148-180-175.ngrok.io/token/obtain/', {username:user.user_id  })
+      console.log(response.data, "회원등록성공~ /signUp 성공");
+      axios.post('https://6007-221-148-180-175.ngrok.io/token/', {username:user.user_id  })
       .then(res => {
-      console.log(response.data + "회원등록성공~obtain res then 성공");
+        console.log(response.data, "access refreshtoken 최초 발급 성공");
         if (res.status == 201 || res.status == 200) {
-          window.localStorage.setItem("token", JSON.stringify({
-            access_token: res.data.access_token,
-            refresh_token: res.data.refresh_token
-        }));
-        
-        navigate(`/project`);
+          onLoginSuccess();
+          navigate(`/project`);
         }
-      else {
-        window.alert("로그인에 실패하였습니다.");
+        else if (res.status === 202) {
+          console.log(res);
+          window.alert("이미 DB에 존재 로그인에 실패하였습니다.");
       }
       })
     })
     setLogin(true);
-    navigate('/');
-    //props.changeModal();
+    navigate('/project');
   }
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);
   };
-  const handleProvinceChange = value => {
-    console.log(value);
-    setFirstCity(value);
-    setCities(city[value]);
-    setSecondCity(city[value][0]);
-    console.log("setCities" + cities);
-  };
-  const onSecondCityChange = value => {
-    setSecondCity(value);
-    console.log("onSecondCityChange")
-    console.log(value);
-  };
   const handleInput = (e) => {
     setEmail(e.target.value);
   };
-
   return (
     <>
       <StyledBody modal={props.modal}>
@@ -116,7 +90,6 @@ const Department = (props) => {
           lg={{ span: 7, offset: 3 }}
           initialValues={{
             remember: true
-            //requiredMarkValue:requiredMark
           }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
@@ -138,23 +111,6 @@ const Department = (props) => {
               placeholder={"@daily-funding.com"}
           />
         </Form.Item>
-          
-        {/* <Form.Item label={<label style={{ color: "black" }}>부서 명</label>}>
-          <Select defaultValue={department[0]} onChange={handleProvinceChange} >
-            {department.map(province => (
-            <Option key={province}>{province}</Option>
-            ))}
-          </Select>
-        </Form.Item>
-        <Form.Item
-          label={<label style={{ color: "black" }}>담당 이슈</label>}
-        >
-          <Select value={secondCity} onChange={onSecondCityChange}>
-            {cities && cities.map(city => (
-              <Option key={city}>{city}</Option>
-            ))}
-          </Select>
-        </Form.Item> */}
         <Form.Item >
           <Button
             //onClick={onSubmitForm}
@@ -165,7 +121,7 @@ const Department = (props) => {
             className={"department-form-button"}
             block
           >
-            {props.modal ? "수정" : "등록"}
+          {props.modal ? "수정" : "등록"}
           </Button>
         </Form.Item>
         </Form>
@@ -175,3 +131,4 @@ const Department = (props) => {
 );
 }
 export default Department;
+

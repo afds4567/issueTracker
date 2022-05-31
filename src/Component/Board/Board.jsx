@@ -1,127 +1,116 @@
-import React,{ useState } from "react";
+import React,{ useState, useEffect } from "react";
 import Header from "../header";
+import AsteroidLoadingSpinner from 'asteroid-loading-spinner'
 import { DragDropContext, Droppable} from "react-beautiful-dnd";
 import styled from "styled-components";
 import Column from "./Column";
-
-const dataset = {
-	tasks: {
-		"task-1": { id: "task-1", content: "이슈 내용 1" },
-		"task-2": { id: "task-2", content: "이슈 내용 2" },
-		"task-3": { id: "task-3", content: "이슈 내용 3" },
-		"task-4": { id: "task-4", content: "이슈 내용 4" },
-		"task-5": { id: "task-5", content: "이슈 내용 5" },
-		"task-6": { id: "task-6", content: "이슈 내용 6" },
-		"task-7": { id: "task-7", content: "이슈 내용 7" },
-		"task-8": { id: "task-8", content: "이슈 내용 8" },
-		"task-9": { id: "task-9", content: "이슈 내용 9" },
-		"task-10": { id: "task-10", content: "이슈 내용 10" },
-		"task-11": { id: "task-11", content: "이슈 내용 11" },
-		"task-12": { id: "task-12", content: "이슈 내용 12" }
-	},
-	columns: {
-		"column-1": { id: "column-1", title: "Todo", taskIds: ['task-1'] },
-		"column-2": { id: "column-2", title: "In progress", taskIds: ['task-2', 'task-3'] },
-		"column-3": { id: "column-3", title: "Review", taskIds: [] },
-		"column-4": { id: "column-4", title: "Completed", taskIds: ["task-4"] },
-
-		"column-5": { id: "column-5", title: "Todo", taskIds: ['task-5'] },
-		"column-6": { id: "column-6", title: "In progress", taskIds: ['task-6'] },
-		"column-7": { id: "column-7", title: "Review", taskIds: ['task-7'] },
-		"column-8": { id: "column-8", title: "Completed", taskIds: ["task-8"] },
-
-		"column-9": { id: "column-9", title: "Todo", taskIds: ['task-9'] },
-		"column-10": { id: "column-10", title: "In progress", taskIds: ['task-10'] },
-		"column-11": { id: "column-11", title: "Review", taskIds: ['task-11'] },
-		"column-12": { id: "column-12", title: "Completed", taskIds: ["task-12"] }
-	},
-	columnOrder: ["column-1", "column-2", "column-3", "column-4"],
-	columnOrder2: ["column-5", "column-6", "column-7", "column-8"],
-	columnOrder3: ["column-9", "column-10", "column-11", "column-12"]
-};
+import axios from 'axios';
+import { atom, selector, useRecoilValue,useRecoilState } from 'recoil';
+import {aprojectid} from '../../Recoil/atoms';
+import { useParams } from "react-router-dom";
 const Container = styled.div`
-    display : flex;
+  display : flex;
 `
 const StickyBar = styled.div`
 	margin: 8px;
 	padding: 8px;
-    //border: 1px solid lightgrey;
+	//border: 1px solid lightgrey;
 	font-weight: bold;
-    border-radius: 2px;
-    width:100%;
-    display:flex;
-    flex-direction: column;
-    background-color:white;
+	border-radius: 2px;
+	width:100%;
+	display:flex;
+	flex-direction: column;
+	background-color:#ea8685;
 `
-
-
 const Board = () => {
-	const [data, setData] = useState(dataset);
+	const params = useParams();
+	const [data, setData] = useState(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState(null);
+	const [PID, setPID] = useRecoilState(aprojectid);
+	//const PID = useRecoilValue(aprojectid);
+	useEffect(() => {
+		const fetchData = async () => {
+			
+			try {
+				// 요청이 시작 할 때에는 error 와 users 를 초기화하고
+				setError(null);
+				setData(null);
+				// loading 상태를 true 로 바꿉니다.
+				setLoading(true);
+				console.log(PID);
+				console.log(params);
+				const response = await axios.get(
+					// 'https://6e54f48d-b34e-497e-bf72-69aaffd4d747.mock.pstmn.io/project/1'
+					`https://6007-221-148-180-175.ngrok.io/project/${params.projectId}/`
+				);
+				console.log(response.data.boards);
+				setData(response.data.boards); // 데이터는 response.data 안에 들어있습니다.
+			} catch (e) {
+				setError(e);
+			}
+			setLoading(false);
+		};
+		if (PID == 0) { setPID(params.projectId); } ;
+		fetchData();
+		console.log(PID);
+	}, []);
 
+  if (loading) return <div style={{margin:"auto"}}> <AsteroidLoadingSpinner circleClassName="#ea7317" /></div>;
+  if (error) return <div>에러가 발생했습니다</div>;
+  if (!data) return null;
 	function handleOnDragEnd(result) {
 		console.log('result ? ', result);
-		const { destination, source, draggableId, type } = result;
+		const { destination,draggableId, source, type } = result;
 		if (!destination) { return };
 		if (destination.droppableId === source.droppableId && destination.index === source.index) { return };
-		const start = data.columns[source.droppableId];
-    const finish = data.columns[destination.droppableId];
 		//If dropped inside the same column
-		if (start === finish) {
-			const newTaskIds = Array.from(start.taskIds);
-			newTaskIds.splice(source.index, 1);
-			newTaskIds.splice(destination.index, 0, draggableId);
-			const newColumn = {
-				...start,
-				taskIds: newTaskIds
-			}
-			const newState = {
-				...data,
-				columns: {
-					...data.columns,
-					[newColumn.id]: newColumn
-				}
-			}
-			setData(newState)
-			return;
-		}
+		if (destination.droppableId === source.droppableId) {
+			//같은 column의 이슈들을 순서대로 배열로 만들어서 다시 넣어준다.
+			const newTasks = Array.from(data[destination.droppableId-1].issue);
+			//상태 변경 예정인 task를 변수 item에 임시저장
+			const item = newTasks[source.index];
+			//상태 변경 예정인 task를 삭제
+			newTasks.splice(source.index, 1);
+			//상태 변경 예정인 task를 새로운 위치에 삽입
+      newTasks.splice(destination.index, 0,item);
+			//새로운 위치에 있는 task들을 다시 배열로 만들어서 다시 넣어준다.
+			const temp = data;
+			temp[destination.droppableId-1].issue = newTasks;
+			setData([...temp]);
+      return;
+    }
 		//If dropped in a different column
-		const startTaskIds = Array.from(start.taskIds);
-		startTaskIds.splice(source.index, 1);
-		const newStart = {
-			...start,
-			taskIds: startTaskIds
-		}
-		const finishTaskIds = Array.from(finish.taskIds);
-		finishTaskIds.splice(destination.index, 0, draggableId);
-		const newFinish = {
-			...finish,
-			taskIds: finishTaskIds
-		}
-		const newState = {
-			...data,
-			columns: {
-				...data.columns,
-				[newStart.id]: newStart,
-				[newFinish.id]: newFinish
-			}
-		}
-
-		setData(newState)
-  }
+		//Source Column
+		const startTasks = Array.from(data[source.droppableId - 1].issue);
+		const item = startTasks[source.index];
+		startTasks.splice(source.index, 1);
+		const temp = data;
+		temp[source.droppableId - 1].issue = startTasks;
+		//Destination column 
+		const finishTasks = Array.from(data[destination.droppableId - 1].issue);
+		const destinationBoardId = data[destination.droppableId - 1].board_id;
+		finishTasks.splice(destination.index, 0, item);
+		temp[destination.droppableId - 1].issue = finishTasks;
+		setData([...temp]);
+		console.log("도착칼럼", destination.droppableId);
+		console.log("item check", item);
+		axios.patch(`https://6007-221-148-180-175.ngrok.io/issue/${item.issue_id}/`, { board :destinationBoardId })
+		console.log("확인", data);	
+	}
 	return (
 		<>
 			<Header />
-			<div style={{ padding: "0.5rem 8rem" }}>
+			<div style={{ padding: "0.5rem 8rem",backgroundColor:"#f7d794" }}>
 			<div style={{ display:"flex", margin:"8px"  }}>
-				{data.columnOrder.map((id, index) => {
-					const column = data.columns[id];
-					return <StickyBar>{column.title}</StickyBar>
+				{data.map((id, index) => {
+					return <StickyBar key={index}>{id.title}</StickyBar>
 				 })}
 				</div>
 			</div>
 			<hr/>
-			<div style={{ padding: "0rem 8rem" }}>
-				<div style={{padding:"1px 16px 1px"}}>1팀</div>
+			<div style={{ height:"100vh",backgroundColor:"#ffdd59",padding: "0rem 8rem" }}>
+				<div style={{padding:"1px 16px 1px"}}></div>
 			<DragDropContext onDragEnd={handleOnDragEnd}>
 				<Droppable droppableId="all-columns" direction='horizontal' type='column'>
 					{(provided) => (
@@ -129,42 +118,11 @@ const Board = () => {
 							{...provided.droppableProps}
 							ref={provided.innerRef}
 						>
-							
-								{data.columnOrder.map((id, index) => {
-									const column = data.columns[id];
-									const tasks = column.taskIds.map(taskId => data.tasks[taskId])
-									return <Column key={column.id} column={column} tasks={tasks} index={index} />
-								})}
-							{provided.placeholder}
-						</Container>
-					)}
-				</Droppable>
-				</DragDropContext>
-				<div style={{padding:"1px 16px 1px"}}>2팀</div>
-				<DragDropContext onDragEnd={handleOnDragEnd}>
-				<Droppable droppableId="all-columns" direction='horizontal' type='column'>
-					{(provided) => (
-						<Container
-							{...provided.droppableProps}
-							ref={provided.innerRef}
-						>
-								{data.columnOrder2.map((id, index) => {
-									const column = data.columns[id];
-									const tasks = column.taskIds.map(taskId => data.tasks[taskId])
-									return <Column key={column.id} column={column} tasks={tasks} index={index} />
-
-									// <Draggable key={id} draggableId={id} index={index}>
-									// 	{(provided) => (
-									// 		<li
-									// 			ref={provided.innerRef}
-									// 			{...provided.dragHandleProps}
-									// 			{...provided.draggableProps}
-									// 		>
-									// 			{title}
-									// 		</li>
-									// 	)}
-									// </Draggable>
-								})}
+							{data.map((board, index) => {
+								const column = board;
+								const tasks = board.issue;
+								return <Column key={column.id} column={column} tasks={tasks} index={index} />
+							})}
 							{provided.placeholder}
 						</Container>
 					)}

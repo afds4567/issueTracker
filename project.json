@@ -1,38 +1,39 @@
 {
   "data": [
     {
-      "id": 1,
-      "title": "IT실",
-      "description": "IT실입니다."
+      "project_id": 1,
+      "project_name": "IT실",
+      "description": "IT실입니다.",
+      "board_type":""
     },
     {
-      "id": 2,
-      "title": "디자인팀",
+      "project_id": 2,
+      "project_name": "디자인팀",
       "description": "디자인팀입니다."
     },
     {
-      "id": 3,
-      "title": "경영지원팀",
+      "project_id": 3,
+      "project_name": "경영지원팀",
       "description": "경영지원팀입니다."
     },
     {
-      "id": 4,
-      "title": "디자인팀",
+      "project_id": 4,
+      "project_name": "디자인팀",
       "description": "디자인팀입니다"
     },
     {
-      "id": 6,
-      "title": "상품기획팀",
+      "project_id": 6,
+      "project_name": "상품기획팀",
       "description": "상품기획팀입니다"
     },
     {
-      "id": 7,
-      "title": "경영지원팀",
+      "project_id": 7,
+      "project_name": "경영지원팀",
       "description": "경영지원팀입니다"
     },
     {
-      "id": 9,
-      "title": "경영지원팀",
+      "project_id": 9,
+      "project_name": "경영지원팀",
       "description": "경영지원팀입니다"
     }
   ]

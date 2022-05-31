@@ -1,16 +1,17 @@
 import Comment from "./comment";
 import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from 'react-router-dom';
 import Axios from "axios";
 const Testview = (props) => {
 	//const IssueId = props.match.params.videoId;
-	const IssueId =1;
+	const { issueId } = useParams();
 	const [Comments, setComments] = useState([]);
 	useEffect(() => {
 		Axios
-			.get(`http://localhost:3000/comment/`)
+			.get(`https://6007-221-148-180-175.ngrok.io/issue/${issueId}`)
 			.then((response) => {
-				setComments(response.data);
-				console.log(response.data);
+				setComments(response.data.comment);
+				console.log(response.data.comment);
 				}	
 			)
 	},[])
@@ -26,7 +27,7 @@ const Testview = (props) => {
 			<Comment
 				refreshFunction={refreshFunction}
 				commentLists={Comments}
-				IssueId={IssueId}
+				IssueId={issueId}
 				/>
 			</div>
 		</>
