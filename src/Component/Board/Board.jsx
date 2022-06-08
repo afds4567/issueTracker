@@ -7,7 +7,7 @@ import Column from "./Column";
 import axios from 'axios';
 import { atom, selector, useRecoilValue,useRecoilState } from 'recoil';
 import {aprojectid} from '../../Recoil/atoms';
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 const Container = styled.div`
   display : flex;
 `
@@ -28,8 +28,13 @@ const Board = () => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [PID, setPID] = useRecoilState(aprojectid);
+	const navigate = useNavigate();
 	//const PID = useRecoilValue(aprojectid);
 	useEffect(() => {
+		if (params.projectId < 1 || params.projectId =='undefined') {
+			window.alert("프로젝트를 선택해주세요");
+			navigate("/project");
+		}
 		const fetchData = async () => {
 			
 			try {
@@ -56,7 +61,7 @@ const Board = () => {
 		console.log(PID);
 	}, []);
 
-  if (loading) return <div style={{margin:"auto"}}> <AsteroidLoadingSpinner circleClassName="#ea7317" /></div>;
+  if (loading) return <div style={{ textAlign: 'center' }}><AsteroidLoadingSpinner style={{margin:'auto'}}  /></div>;
   if (error) return <div>에러가 발생했습니다</div>;
   if (!data) return null;
 	function handleOnDragEnd(result) {
@@ -104,7 +109,7 @@ const Board = () => {
 			<div style={{ padding: "0.5rem 8rem",backgroundColor:"#f7d794" }}>
 			<div style={{ display:"flex", margin:"8px"  }}>
 				{data.map((id, index) => {
-					return <StickyBar key={index}>{id.title}</StickyBar>
+					return <StickyBar key={index}>{id.state}</StickyBar>
 				 })}
 				</div>
 			</div>

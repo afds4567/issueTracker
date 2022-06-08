@@ -4,42 +4,32 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from '@ant-design/icons';
 import Header from './header';
+import AsteroidLoadingSpinner from 'asteroid-loading-spinner'
 import { useRecoilValue,useRecoilState } from 'recoil';
 import {isLoggedInRecoil} from '../Recoil/atoms';
 import axios from "axios";
 import useAsync from './useAsync';
-import {aprojectid} from '../Recoil/atoms';
+import { aprojectid } from '../Recoil/atoms';
+
 async function getIssue(projectId) {
+  
   const response = await axios.get(
     `https://6007-221-148-180-175.ngrok.io/project/${projectId}`
     //'https://6e54f48d-b34e-497e-bf72-69aaffd4d747.mock.pstmn.io'
-  );
+  )
   var issues = [];
-  console.log(response.data);
   response.data.boards.map((i) => (i.issue.map((j) => { j['status'] = i.title; issues.push(j); })));
   console.log(issues);
   return issues;
 }
   
 const List = () => {
+  const navigate = useNavigate();
   const { projectId } = useParams();
-  const [top, setTop] = useState('none');
-  const [bottom, setBottom] = useState('bottomCenter');
+  const top = 'none';
+  const bottom = 'bottomCenter';
   const [data, setData] = useState([
-    // {
-    //   issue_id: "",
-    //   title: "",
-    //   reporter: "",
-    //   assignee: "[]",
-    //   content: "",
-    //   deadline: "",
-    //   priority: "",
-    //   created_at: "",
-    //   updated_at: "",
-    //   board: ""
-    // }
   ]);
-  
   const [currentpid, setProjectid] = useRecoilState(aprojectid);
   const [current, setCurrent] = useState(1);
   const [searchText, setSearchText] = useState('');
@@ -50,7 +40,7 @@ const List = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeRecord, setActiveRecord] = useState(null);
   const [state] = useAsync(() => getIssue(projectId), []);
-  const {loading,data:issue,error} = state;
+  const { loading, data: issue, error } = state;
   const closeModal = () => {
     setIsModalVisible(false);
   };
@@ -149,49 +139,42 @@ const List = () => {
       key: '요약',
       ...getColumnSearchProps('title'),
     },
-    // {
-    //   title: '우선순위',
-    //   key: 'priority',
-    //   dataIndex: 'priority',
-    //   filters: [
-    //     {
-    //       text: '긴급',
-    //       value: 'F',
-    //     },
-    //     {
-    //       text: '보통',
-    //       value: 'M',
-    //     },
-    //     {
-    //       text: '여유',
-    //       value: 'S',
-    //     }
-    //   ],
-    //   onFilter: (value, record) => record.priority.indexOf(value) === 0,
-    //   render: (priority) => {
-    //     let color = (priority === 'M') ? 'geekblue' : 'green';
-    //     if (priority === 'F') {
-    //       color = 'volcano';
-    //       console.log(color)
-    //     }
-    //     return (
-    //       <Tag color={color} key={priority}>
-    //         {priority==='F'?'긴급': (priority==='M'?"보통":"여유")}
-    //       </Tag>
-    //     )
-    //   }
-    // },
     {
-      title: '기한',
-      dataIndex: 'deadline',
-      key: 'dday',
-      sorter: (a, b) => a.deadline.localeCompare(b.deadline),
-      defaultSortOrder: 'descend',
+      title: '우선순위',
+      key: 'priority',
+      dataIndex: 'priority',
+      filters: [
+        {
+          text: '긴급',
+          value: 'F',
+        },
+        {
+          text: '보통',
+          value: 'M',
+        },
+        {
+          text: '여유',
+          value: 'S',
+        }
+      ],
+      onFilter: (value, record) => record.priority.indexOf(value) === 0,
+      render: (priority) => {
+        let color = (priority === 'M') ? 'geekblue' : 'green';
+        if (priority === 'F') {
+          color = 'volcano';
+          console.log(color)
+        }
+        return (
+          <Tag color={color} key={priority}>
+            {priority==='F'?'긴급': (priority==='M'?"보통":"여유")}
+          </Tag>
+        )
+      }
     },
     {
       title: '담당자',
       dataIndex: "assignee",
-      render: (assignee) => { const ans = assignee.filter(a => a.mension === false).map(a=>a.user+" "); console.log(ans); return ans },
+      render: (assignee) => { const ans = assignee.filter(a => a.mension === false).map(a => a.user + " "); console.log(ans); return ans },
       key: "assignee"
       
     },
@@ -199,6 +182,13 @@ const List = () => {
       title: '보고자',
       dataIndex: 'reporter',
       key: '보고자',
+    },
+    {
+      title: '기한',
+      dataIndex: 'deadline',
+      key: 'dday',
+      sorter: (a, b) => a.deadline.localeCompare(b.deadline),
+      defaultSortOrder: 'descend',
     },
     // {
     //   title: '생성일',
@@ -210,24 +200,34 @@ const List = () => {
   ];
   
   const isLoggedIn = useRecoilValue(isLoggedInRecoil);
-  const navigate = useNavigate();
+  
   
   useEffect(() => {
+    console.log(data);
     (async () => {
       console.log(currentpid)
       setProjectid(projectId);
-    if (!isLoggedIn) {
-      //navigate('/login');
+      if (projectId == 'undefined' || currentpid < 1 && projectId < 1) {
+        window.alert("프로젝트를 선택해주세요");
+        navigate("/project");
+      }
       setCurrent(1);
       const response = await getIssue(projectId);
       setData([...response]);
-      console.log("check", [...response]);
-      
-    }})();
+      if (response.length === 0) {
+        window.alert("해당 프로젝트에 아직 이슈가 없습니다. 이슈를 만드세요")
+        navigate(`/project/${projectId}/create`)
+      }
+      console.log("check", response);
+    })();
   }, [projectId]);
-  
+ 
   return (
+    
     <> 
+      
+      {data.length > 0 ?
+        <>
       <Header/>
       <div style={{ padding: "3rem 8rem" }}>
         <h1>이슈 리스트</h1>
@@ -245,7 +245,6 @@ const List = () => {
           rowKey={record => record.issue_id}
           onRow={(record) => {
             return {
-            
             onDoubleClick: () => {
               navigate(`/issue/${record.issue_id}`);
               // setActiveRecord(record);
@@ -254,24 +253,9 @@ const List = () => {
           };
         }}
         />
-        {/* <Modal
-        title="이슈 디테일"
-        visible={isModalVisible}
-        onCancel={closeModal}
-        footer={null}
-      >
-        {/* render whatever you want based on your record */}
-        {/* <p>요약: {activeRecord?.요약} </p>
-        <p>설명: 에디터툴적용보안 </p>
-        <p>카테고리: </p>
-        <p>댓글 : antd 멘션 사용 </p>
-        <p>담당자: {activeRecord?.담당자}</p>
-        <p>보고자: {activeRecord?.보고자}</p>
-        <p>진행상태: {activeRecord?.tags} </p>
-        <p>우선순위:  </p>
-        <p>기한: {activeRecord?.dday} </p>
-      //</Modal> */}
-      </div>
+          </div>
+        </> : <div style={{ textAlign: 'center' }}><AsteroidLoadingSpinner style={{margin:'auto'}}  /></div>
+      }
     </>
   );
 }

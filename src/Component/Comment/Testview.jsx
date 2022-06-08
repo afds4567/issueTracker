@@ -1,4 +1,4 @@
-import Comment from "./comment";
+import Commentcomponent from "./comment";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import Axios from "axios";
@@ -24,7 +24,7 @@ const Testview = (props) => {
 	return (
 		<>
 			<div style={{ padding: "0.5rem 0rem" }}>
-			<Comment
+			<Commentcomponent
 				refreshFunction={refreshFunction}
 				commentLists={Comments}
 				IssueId={issueId}

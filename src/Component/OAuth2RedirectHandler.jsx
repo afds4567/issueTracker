@@ -60,7 +60,11 @@ const OAuth2RedirectHandler = (props) => {
       .post('https://6007-221-148-180-175.ngrok.io/auth/slack', { access_token: token })
       .then(res => {
         //최초 접속 시 department에서 이메일 등록 후 token 발급 
-        console.log("slack access token 발급 최초 성공");
+        console.log("local storage에 현재 사용자 정보 저장");
+          window.localStorage.setItem("user", JSON.stringify({
+          name: res.data.name,
+          user_id: res.data.username,
+          }));
         if (res.status == 201 || res.status == 200) {
           let clonedUser = cloneDeep(user);
           clonedUser.name = res.data.name;

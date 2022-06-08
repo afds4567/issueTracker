@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { InboxOutlined } from '@ant-design/icons';
-import { Button, Upload } from 'antd';
+import React, {  useState } from 'react';
 import axios from 'axios';
 import styled from "styled-components";
-const { Dragger } = Upload;
 const SelectButton = styled.button`
   padding: 6px 25px;
   background-color: ${(props) => props.color || "#fbc531"};
@@ -12,7 +9,7 @@ const SelectButton = styled.button`
   color: white;
   cursor: pointer;
 `;
-const SingleImageUploadComponent = () => {
+const SingleImageUploadComponent = (props) => {
   const [file, setFile] = useState([]);
   const [data, setData] = useState([]);
   const hiddenFileInput = React.useRef(null);
@@ -24,6 +21,7 @@ const SingleImageUploadComponent = () => {
   function uploadSingleFile(e) {
     setFile([ ...file, URL.createObjectURL(e.target.files[0]) ]);
     setData([...data, (e.target.files[0])]);
+    props.setAttach([...data, (e.target.files[0])]);
     console.log('e.target.files[0]', file, e.target.files[0]);
   }
 

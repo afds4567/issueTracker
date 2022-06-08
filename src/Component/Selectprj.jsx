@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import CreatePrj from './Createprj';
 import Header from './header';
 import { Link } from 'react-router-dom';
+import AsteroidLoadingSpinner from 'asteroid-loading-spinner'
 import { SetRecoilState } from 'recoil';
 import {aprojectid} from '../Recoil/atoms';
 import { useRecoilState } from 'recoil';
@@ -49,7 +50,6 @@ const ProjectSelect = () => {
 	const [state] = useAsync(getProjects, []);
 	const {  data: projects,  } = state
 	const [isModalVisible, setIsModalVisible] = useState(false);
-	const [projectId, setprojectId] = useRecoilState(aprojectid);
 	const changeModal = () => {
 		setIsModalVisible(false);
 	}
@@ -68,6 +68,7 @@ const ProjectSelect = () => {
 	}
 	return (
 		<>
+			{projects?.length > 0? <>
 			<Header/>
 			<Wrapper>
 				<Title>프로젝트 선택</Title>
@@ -78,7 +79,7 @@ const ProjectSelect = () => {
 				</Modal>
 				{/* </Link> */}
 				<Container>
-					{projects && projects.map(project => (
+					{projects && projects.map((project,i) => (
 						<Link to={`/Project/${project.project_id}`} key={project.project_id}>
 						<StyledCard
 						hoverable		
@@ -88,7 +89,7 @@ const ProjectSelect = () => {
 						cover={
 						<img
 							alt="example"
-							src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png"
+								src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${10080+i}.png`}
 							style={{marginBottom: "2rem"}}
 						/>
 						}
@@ -102,7 +103,9 @@ const ProjectSelect = () => {
 						</Link>
 					))}
 				</Container>
-			</Wrapper>
+				</Wrapper>
+			</>
+			:<div style={{ textAlign: 'center' }}><AsteroidLoadingSpinner style={{margin:'auto'}}  /></div>}
 		</>
 	);
 };

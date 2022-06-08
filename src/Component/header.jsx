@@ -52,12 +52,10 @@ const Header = () => {
 					</Link>
 				</Menu.Item>
 				<Menu.Item  key="내 이슈" icon={<RedditOutlined />}>
-						{/* <a href="https://ant.design" target="_blank" rel="noopener noreferrer"> */}
-						내 이슈
-						{/* </a> */}
+						<Link to= {`/project/MyIssue`}>내 이슈</Link>
 				</Menu.Item>
 				<Menu.Item key="이슈 만들기" icon={<PlusCircleTwoTone twoToneColor="#eb2f96"/>} >
-					<Link to= "/createIssue">이슈 만들기</Link>
+					<Link to= {`/project/${PID}/create`}>이슈 만들기</Link>
 				</Menu.Item>
 
 				<Menu.Item key="프로젝트 선택" icon={<FolderOpenTwoTone twoToneColor="#52c41a"/>} >

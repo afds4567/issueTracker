@@ -59,7 +59,7 @@ const SiderWrapper = styled.div`
 `
 const SiderItemWrapper = styled.div`
 	marginTop:2rem;
-	borderRadius:5px;
+	border-radius:5px;
 	height:auto;
 	border:1px solid #d9d9d9;
 	background-color: rgb(242 242 242 / 25%);
@@ -69,9 +69,18 @@ const StyledFooter = styled(Footer)`
 	line-height: 3rem;
 	height : 3rem;
 `
+const ImageLink = styled.div`
+	cursor: pointer;
+	marginTop:1rem;
+	:hover {
+			background-color: #7ec1ff;
+		}
+`
 const ViewIssue = () => {
   const { issueId } = useParams();
-  const [data,setData] = useState([]);
+	const [data, setData] = useState([]);
+	const cont = (data.content);
+	const attach = data.attachment;
   useEffect(() => {
     axios.get(`https://6007-221-148-180-175.ngrok.io/issue/${issueId}/`)
       .then( (res) => {
@@ -89,11 +98,15 @@ const ViewIssue = () => {
       <StyledLayout >
 				<StyledHeader />
 				<Layout>
-						<StyledContent>
-        	<WriterWrapper><div style={{ fontWeight: "bold" }}>Created by</div><Avatar style={{ padding: "3px", marginLeft: "10px" }} src="https://joeschmoe.io/api/v1/random" /> {data.reporter}</WriterWrapper>
-				{/* <Input value={data.title} style={{caretColor: "transparent", cursor:"none"}} maxLength={20} readOnly={true} placeholder={"요약"} bordered={false}  /> */}
-						<h1>이슈 제목 위치: {data.title}</h1>
-						<div style={{ caretColor: "transparent", cursor:"none", height: "200px", border: "1px solid black" }}>이슈 내용: {data.content}</div>
+					<StyledContent>
+						<div style={{ fontWeight: "bold",display:"flex",justifyContent:"space-between",alignItems:"center",caretColor: "transparent", cursor: "none", height: "50px" }}>
+							<div style={{display:"inline", float:"right"}}>{data.title}</div>
+							<WriterWrapper style={{float:"left"}}><div style={{ fontWeight: "bold" }}>Created by</div><Avatar style={{ padding: "3px", marginLeft: "10px" }} src="https://joeschmoe.io/api/v1/random" /> {data.reporter}</WriterWrapper>
+						</div>
+						<div dangerouslySetInnerHTML={ {__html: cont} } style={{ caretColor: "transparent", cursor:"none", height: "200px", border: "1px solid black" }}></div>
+						<div style={{marginTop:"1rem"}}>
+							{attach && attach.map((item, index) => { console.log(item.image); return(<ImageLink onClick={() => window.open(item.image, '_blank')}>{`첨부파일${index+1}`}</ImageLink>)})}
+						</div>
 						<Testview /> 
 					</StyledContent>
 					<StyledSider>

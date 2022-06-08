@@ -56,6 +56,11 @@ const LoginSlack = (props) => {
 			console.log(query);
 			getAccessTokenHandler(query.code.toString());
 		}
+		if (localStorage.getItem('token')) {
+			//const access_token = response.data.token;
+			const access_token = JSON.parse(window.localStorage.getItem("token")).access_token;
+			navigate('/project');
+		}
 		const jwttoken = localStorage.getItem("token");
 		const token = JSON.parse(jwttoken);
 		// if (token) {

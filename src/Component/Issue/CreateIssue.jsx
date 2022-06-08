@@ -1,12 +1,16 @@
-import React, { useState,useRef } from "react";
+import React, { useState, useEffect } from "react";
+import { useParams,useNavigate } from 'react-router-dom';
+import { useRecoilState } from "recoil";
+import axios from 'axios';
 import MainHeader from "../header";
 import styled from "styled-components";
-import { BellTwoTone,InboxOutlined} from '@ant-design/icons';
-import { Layout ,Avatar, Tag, Input,Form, DatePicker, Select, message,Button} from 'antd';
-import Testview from "../Comment/Testview";
+import { BellTwoTone} from '@ant-design/icons';
+import { Layout ,Avatar, Tag, Input,Form, DatePicker, Select,Button} from 'antd';
 import SingleImageUploadComponent from "./upload";
 import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { CKEditor } from '@ckeditor/ckeditor5-react'
+import { getResponsibility } from "../Comment/userFetch";
+import { aprojectid } from "../../Recoil/atoms";
 //import Mention from '@ckeditor/ckeditor5-mention/src/mention';
 function customItemRenderer( item ) {
   const itemElement = document.createElement( 'span' );
@@ -69,17 +73,14 @@ const editorConfiguration = {
 	}
 };
 
-// const { TextArea } = Input;
-//const { Dragger } = Upload;
 const { Header, Footer, Sider, Content } = Layout;
 const { Option } = Select;
-
-const CategoryData = ['프론트엔드', '백엔드'];
-const OwnerData = {
-  프론트엔드: ['하지원', 'Gangnam', 'Wenzhou'],
-  백엔드: ['오재현', 'Donghae', 'Zhenjiang'],
-};
-const Priority = ['긴급', '보통', '낮음'];
+// const CategoryData = ['프론트엔드', '백엔드'];
+// const OwnerData = {
+//   프론트엔드: ['하지원', 'Gangnam', 'Wenzhou'],
+//   백엔드: ['오재현', 'Donghae', 'Zhenjiang'],
+// };
+const Priority = ['긴급', '보통', '여유'];
 const Styledmention = styled.div`
 	.ck.ck-list__item {
 		> li {
@@ -158,16 +159,58 @@ const SelectButton = styled.button`
 `;
 
 const CreateIssue = () => {
-	//const [form] = Form.useForm();
-  const [firstCity, setFirstCity] = useState("Seoul");
+	const { projectId } = useParams();
+	const navigate = useNavigate();
+	 const [currentpid, setProjectid] = useRecoilState(aprojectid);
+	useEffect(() => {
+		(async () => {
+      console.log(currentpid)
+      setProjectid(projectId);
+      if (projectId == 'undefined' || currentpid < 1 && projectId < 1) {
+        window.alert("프로젝트를 선택해주세요");
+        navigate("/project");
+      }  
+    })();
+		async function fetchAndSetUser() { 
+			const [category, owner] = await getResponsibility();
+			console.log(category, owner);
+			if (localStorage.getItem('user')) {
+				let temp = JSON.parse(localStorage.getItem('user'));
+				const writer = (temp.user_id);
+				setReporter(writer);
+			}
+			await setCategoryData(category);
+			await setOwnerData(owner);
+			await setFirstCity(category[0]);
+			await setSecondCity(owner[firstCity])
+			await setCities(OwnerData[firstCity]);
+		}
+		async function fetchboard() {
+			const { data } = await axios.get(`https://6007-221-148-180-175.ngrok.io/project/${projectId}/boardList`);
+			const tar = (data.find(item => item.order == 1));
+			setBoardid(tar.board_id);
+		}
+   fetchAndSetUser(); 
+		fetchboard();
+},[ ]);
+	const [reporter,setReporter] = useState('');
+	const [CategoryData, setCategoryData] = useState([]);
+	const [title, setTitle] = useState("");
+	const [boardid, setBoardid] = useState(0);
+	const [content, setContent] = useState("");
+	const [date, setDate] = useState("");
+	const [attach, setAttach] = useState([]);
+	const [OwnerData, setOwnerData] = useState({});
+  const [firstCity, setFirstCity] = useState(CategoryData[0]);
 	const [cities, setCities] = useState(OwnerData[CategoryData[0]]);
-	const [secondCity, setSecondCity] = useState(OwnerData[CategoryData[0]][0]);
+	const [secondCity, setSecondCity] = useState(null);
 	const [priorities, setPriorities] = useState(Priority);
 	const [priority, setPriority] = useState(priorities[0]);
 	//const [descript, setDescript] = useState("");
 	const [subscribe, setSubscribe] = useState(false);
   const onChange = e => {
-  console.log('Change:', e.target.value);
+		//console.log('Change:', e.target.value);
+		setTitle(e.target.value);
 	};
 	const handleProvinceChange = value => {
     setFirstCity(value);
@@ -175,18 +218,61 @@ const CreateIssue = () => {
     setSecondCity(OwnerData[value][0]);
 	};
 	const onSecondCityChange = value => {
-			setSecondCity(value);
+		setSecondCity(value);
 	};
 	const onPriorityChange = value => {
 		setPriority(value);
 	};
 	const onDate=(date, dateString)=> {
-  	console.log(date, dateString);
+		console.log(date, dateString);
+		setDate(dateString);
 	}
 	const handleButton = () => {
 		setSubscribe(!subscribe);
+		console.log(CategoryData[0]);
+		console.log(title);
+		console.log(content);
+		console.log(firstCity);
+		console.log(secondCity);
+		console.log(typeof (secondCity));
+		console.log(priority);
+		console.log(date);
 	}
-
+	const upload=(e)=> {
+    e.preventDefault();
+    let dataforms = new FormData();
+    dataforms.append("reporter", reporter);
+		dataforms.append("board", boardid);
+		dataforms.append("responsibleIssue", firstCity);
+		dataforms.append("assignee[0]user", secondCity);
+    dataforms.append("deadline", date);
+		dataforms.append("title", title);
+		// axios.post(`https://6007-221-148-180-175.ngrok.io/issue/`, dataforms)
+    // //   .then(res => console.log("응답",...res));
+		var t = "";
+		if (priority === "긴급") {
+			t = "F";
+		} else if (priority === "보통") {
+			t = "M";
+		}
+		else if (priority === "여유") {
+			t="S";
+		}
+		dataforms.append("priority",t );
+    dataforms.append("content", content);
+    for (let index = 0; index < attach.length; index++) {
+      console.log(attach[index]);
+      dataforms.append("image", attach[index]);
+    }
+    dataforms.forEach((value, key) => {
+			console.log("key %s: value %s", key, value);
+			
+		});
+		axios.post(`https://6007-221-148-180-175.ngrok.io/issue/`, dataforms)
+      .then(res => console.log("응답",...res));
+		console.log(dataforms);
+  
+  }
 		return (
 			<>
 				<MainHeader />
@@ -200,31 +286,33 @@ const CreateIssue = () => {
 							<Input showCount maxLength={20} onChange={onChange} placeholder={"요약"} />
 							<Styledmention>
 							<StyledCkeditor
-                    editor={ Editor }
-                    config={ editorConfiguration }
-                    data="<p>Hello from CKEditor 5!</p>"
-                    onReady={ editor => {
-                      // You can store the "editor" and use when it is needed.
-											console.log('Editor is ready to use!', editor);
-											editor.editing.view.change( writer => {
-    									writer.setStyle( 'height', '200px', editor.editing.view.document.getRoot());
-											});
-											}
-										}
-                    onChange={ ( event, editor ) => {
-                      const data = editor.getData();
-											console.log({ event, editor, data });
-                    }}
-                    onBlur={ ( event, editor ) => {
-                        console.log( 'Blur.', editor );
-                    }}
-                    onFocus={ ( event, editor ) => {
-                        console.log( 'Focus.', editor );
-                    }}
-                />
-							</Styledmention>
-							<SingleImageUploadComponent />
-						
+								editor={ Editor }
+								config={ editorConfiguration }
+								placeholder="<p>Hello from CKEditor 5!</p>"
+								onReady={ editor => {
+									// You can store the "editor" and use when it is needed.
+									console.log('Editor is ready to use!', editor);
+									editor.editing.view.change( writer => {
+									writer.setStyle( 'height', '200px', editor.editing.view.document.getRoot());
+									});
+									}
+								}
+								onChange={ ( event, editor ) => {
+									//const data = editor.getData();
+									//console.log({ event, editor, data });
+								}}
+									onBlur={(event, editor) => {
+									const data = editor.getData();
+									console.log('Blur.', { event, editor, data });
+									setContent(data);
+								}}
+								onFocus={ ( event, editor ) => {
+										console.log( 'Focus.', editor );
+								}}
+							/>
+						</Styledmention>
+						<SingleImageUploadComponent setAttach={setAttach} />
+							
 							{/*조건부 렌더링 <Testview /> */}
 						</StyledContent>
 					
@@ -233,7 +321,7 @@ const CreateIssue = () => {
 								<SiderItemWrapper>
 									<StyledItem>
 										<div>카테고리</div>
-										<Select defaultValue={CategoryData[0]} onChange={handleProvinceChange} >
+										<Select defaultValue={firstCity} onChange={handleProvinceChange} >
 											{CategoryData.map(province => (
 												<Option key={province}>{province}</Option>
 											))}
@@ -242,9 +330,9 @@ const CreateIssue = () => {
 
 									<StyledItem >
 										<div>담당자</div>
-										<Select value={secondCity} onChange={onSecondCityChange}>
-											{cities.map(city => (
-												<Option key={city}>{city}</Option>
+										<Select defaultValue={secondCity} onChange={onSecondCityChange}>
+											{cities && cities.map((city,i) => (
+												<Option key={city[1]}>{`${city[0]}`} {i==0?'(팀장)':' '} </Option>
 											))}
 										</Select>
 									</StyledItem>
@@ -293,7 +381,7 @@ const CreateIssue = () => {
 									</StyledItem>
 									
 								</SiderItemWrapper>
-									<SelectButton >
+									<SelectButton onClick={upload} >
         이슈 등록
       </SelectButton>
 							</SiderWrapper>

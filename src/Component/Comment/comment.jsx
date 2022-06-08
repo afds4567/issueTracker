@@ -1,105 +1,147 @@
-import React, { useState } from 'react'
-import { Mentions,Input  } from 'antd';
-import {  useRecoilValue } from 'recoil';
+import React, { useState,useEffect } from 'react';
+import getUserInfo from './userFetch'
+import { useRecoilValue } from 'recoil';
+import { MentionsInput, Mention } from "react-mentions";
 import Axios from "axios";
 import SingleComment from "./SingleComment";
 import ReplyComment from './ReplyComment';
 import { _user } from '../../Recoil/atoms';
 import styled from 'styled-components';
+import useAsync from '../useAsync';
+//import './mention-style.css'
 const SelectButton = styled.button`
   padding: 6px 25px;
-	width:auto;
-  background-color: ${(props) => props.color || "#4cd137"};
+  //display: inline-block;
+	// width:auto;
+  background-color: ${(props) => props.color || "#96F2D7"};
   border-radius: 4px;
   color: white;
   cursor: pointer;
 	margin-top:2rem;
+  padding:0px 0.25rem;
 `;
-function Comment(props) {
-  const user = useRecoilValue(_user); 
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  -webkit-box-pack: end;
+`;
+function Commentcomponent(props) {
+  const user = useRecoilValue(_user);
   const IssueId = props.IssueId;
-  const { Option, getMentions } = Mentions;
-  const { TextArea } = Input;
+  const [data] = useAsync(() => getUserInfo(), []);
+  console.log(data);
+  const [state, setState] = useState({
+    value: "",
+    mentionData: null,
+    newtest: "",
+    men: "",
+  })
+  // useEffect(() => {
+  //   (async () => {
+  //     const tresponse = await getUserInfo();
+  //     //const response = tresponse.data;
+  //     setData(tresponse);
+  //     console.log("check",tresponse);
+  //   }
+  // )();
+  // }, );
+  const [comment, setComment] = useState('');
+  const [mentionList, setMentionList] = useState([]);
   const [commentValue, setCommentValue] = useState("");
   const [OpenReply, setOpenReply] = useState(false);
   const onClickReplyOpen = () => {
-		setOpenReply(!OpenReply);
-	};
-  const handleClick = (event) => {
-    console.log(event);
-    setCommentValue(event);
+    setOpenReply(!OpenReply);
   };
-  const checkMention = async (_, value) => {
-    const mentions = getMentions(value);
-    console.log(mentions);
-  };
+  const handleChange = (event, newValue, newPlainTextValue, mentions) => {
+    console.log("H", newPlainTextValue, mentions)
+    setState({
+      value: newValue,
+      mentionData: { newPlainTextValue, mentions },
+      newtest: newPlainTextValue,
+      men: JSON.stringify(mentions.display)
+    })
+    console.log("new", newPlainTextValue)
+    setCommentValue(newPlainTextValue);
+  }
+  const onAdd = (id, display) => {
+    setMentionList({ ...mentionList, display })
+    console.log("Comment inside onAdd: ", display);
+  }
   const onSubmit = (event) => {
     event.preventDefault();
-    checkMention(event, commentValue);
+    console.log(data.data.length);
+    //checkMention(event, commentValue);
+    let writer = "";
+    if (localStorage.getItem('user')) {
+      let temp = JSON.parse(localStorage.getItem('user'));
+      writer = (temp.user_id);
+      console.log(typeof (writer))
+    }
     const variables = {
-    comment_content: commentValue,
-    writer: user.name,
-    issue: IssueId,
+      comment_content: commentValue,
+      writer: writer,
+      issue: IssueId,
     };
-    console.log(IssueId)
+    
     Axios.post(`https://6007-221-148-180-175.ngrok.io/comment/`, variables)
       .then((response) => {
         if (response.data) {
           console.log(response.data);
           props.refreshFunction(response.data);
-        // 부모컴포넌트에 DB에 저장된 댓글정보를 전달해줌
+          // 부모컴포넌트에 DB에 저장된 댓글정보를 전달해줌
           setCommentValue("");
+          window.alert("댓글이 작성되었습니다.");
+          setState({ value: "" });
         } else {
           alert("코멘트를 저장하지 못했습니다.");
         }
       });
-    };   
-    return (
-      <div>
+  };
+  return (
+    <div>
+      <br />
+      {/* Root Comment Form */}
+      {data.data && <div style={{ flexDirection: 'column' }}>
+        {data.data?.length && <MentionsInput
+          style={{ width: '100%', minHeight: '100px' }}
+          //markup="@{{__type__||__id__||__display__}}"
+          value={state.value}
+          className="mentions"
+          onChange={handleChange}
+          placeholder="담당자를 추가하려면 @멘션기능을 사용해주세요"
+        >
+          
+          <Mention
+            trigger="@"
+            data={data.data[0]}
+            //renderSuggestion={renderSuggestion}
+            onAdd={onAdd}
+            className="mentions__mention"
+            appendSpaceOnAdd={true}
+          />
+        </MentionsInput>}
         <br />
-        {/* <p>Replies</p> */}
-        <SelectButton onClick={onClickReplyOpen} key="comment-basic-reply-to">
-			    댓글 펼치기
-		    </SelectButton>
-        <hr />
-      {/* Comment Lists */}
-      {OpenReply&&props.commentLists && props.commentLists.map((comment, index) => (
+        <ButtonWrapper>
+          <SelectButton style={{ marginTop: '0' }} onClick={onSubmit}>
+            댓글작성
+          </SelectButton>
+        </ButtonWrapper>
+      </div>}
+        {/* Comment Lists */}
+      <SelectButton onClick={onClickReplyOpen} key="comment-basic-reply-to">
+        댓글 펼치기
+      </SelectButton>
+      <hr />
+      {OpenReply && props.commentLists && props.commentLists.map((comment, index) => (
         (!comment.parent &&
           <>
             <SingleComment refreshFunction={props.refreshFunction} comment={comment} postId={IssueId} />
-            <ReplyComment refreshFunction={props.refreshFunction} parentCommentId={comment.comment_id} postId={IssueId} commentLists={props.commentLists}/>
+            <ReplyComment refreshFunction={props.refreshFunction} parentCommentId={comment.comment_id} postId={IssueId} commentLists={props.commentLists} />
           </>
-      )))}
-           
-      {/* Root Comment Form */}
-
-        <form style={{ display: 'flex' }} onSubmit={onSubmit}>
-          
-        {/* <textarea
-          style={{ width: '100%', borderRadius: '5px' }}
-          //onChange={handleClick}
-          //value={commentValue}
-          placeholder="코멘트를 작성해 주세요"
-          > */}
-          <Mentions rows={1} style={{ minHeight: '53px', width: '100%', borderRadius: '5px' }}
-            
-          onChange={handleClick}
-          value={commentValue}
-            placeholder="코멘트를 작성해 주세요">
-            <TextArea style={{ resize: 'none' }} rows={3} >
-          <Option value="afc163">afc163</Option>
-          <Option value="zombieJ">zombieJ</Option>
-              <Option value="yesmeck">yesmeck</Option>
-              </TextArea>
-            </Mentions>  
-          
-        <br />
-        <SelectButton style={{ width: '20%', height: 'auto' }} onClick={onSubmit}>
-          Submit
-        </SelectButton>
-      </form>
+        )
+      ))}
     </div>
   );
 }
 
-export default Comment;
+export default Commentcomponent;
