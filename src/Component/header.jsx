@@ -1,15 +1,16 @@
-import React, { useState,useEffect} from 'react';
+import React, { useState,useEffect,memo} from 'react';
 import { RedditOutlined , AppstoreTwoTone, OrderedListOutlined,UserOutlined,PlusCircleTwoTone,FolderOpenTwoTone } from '@ant-design/icons';
 import { Menu, Modal } from 'antd';
 import styled from 'styled-components';
 import Department from './Department';
 import { Link,useLocation } from 'react-router-dom';
 import { aprojectid } from '../Recoil/atoms';
-import { useRecoilValue,useRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 const HeaderWrapper = styled.div`
   padding: 0 8rem;
 	background-color: #fff200;
 `
+
 const Header = () => {
 	//헤더 메뉴 부분 : 보드, 이슈 리스트, 내 이슈, 이슈 만들기, 마이페이지 
 	const [current, setCurrent] = useState("");
@@ -72,5 +73,5 @@ const Header = () => {
 		</HeaderWrapper>
 	);
 }
-    
-export default Header;
+const MemoHeader = memo(Header);
+export default MemoHeader;

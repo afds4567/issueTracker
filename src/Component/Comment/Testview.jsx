@@ -1,6 +1,6 @@
 import Commentcomponent from "./comment";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from 'react-router-dom';
+import {useParams } from 'react-router-dom';
 import Axios from "axios";
 const Testview = (props) => {
 	//const IssueId = props.match.params.videoId;
@@ -12,6 +12,7 @@ const Testview = (props) => {
 			.then((response) => {
 				setComments(response.data.comment);
 				console.log(response.data.comment);
+				//props.setLoading(false);
 				}	
 			)
 	},[])

@@ -1,15 +1,12 @@
-import React, { useEffect,useState,useRef } from "react";
-import MainHeader from "../header";
+import React, { useEffect,useState,memo } from "react";
 import styled from "styled-components";
-import { InboxOutlined,BellTwoTone} from '@ant-design/icons';
-import { Layout ,Avatar, Tag, Input, Icon,Form, DatePicker, Select,Upload, message,Button} from 'antd';
-import Api from "../../network/api";
+import AsteroidLoadingSpinner from 'asteroid-loading-spinner'
+import { BellTwoTone} from '@ant-design/icons';
+import { Layout ,Avatar,Form, Select,Button} from 'antd';
 import Testview from "../Comment/Testview";
-import SingleImageUploadComponent from "./upload";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-// const { TextArea } = Input;
-const { Dragger } = Upload;
+// import MainHeader from "../header";
 const { Header, Footer, Sider, Content } = Layout;
 const { Option } = Select;
 
@@ -74,27 +71,90 @@ const ImageLink = styled.div`
 	marginTop:1rem;
 	:hover {
 			background-color: #7ec1ff;
-		}
+	}
 `
+const SelectButton = styled.button`
+  padding: 6px 25px;
+	width:100%;
+  background-color: ${(props) => props.subscribe ? 'red' : "#4cd137"};
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+	margin-top:0.5rem;
+	margin-bottom:0.5rem;
+`;
+
 const ViewIssue = () => {
+	const [loading, setLoading] = useState(true);
   const { issueId } = useParams();
 	const [data, setData] = useState([]);
+	const [Pid, setPid] = useState(0);
+	const [name, setName] = useState("");
+	const [status, setStatus] = useState([]);
+	const [owner, setOwner] = useState(false);
+	const [subscribe, setSubscribe] = useState(false);
+	const [assignee, setAsignee] = useState(false);
 	const cont = (data.content);
 	const attach = data.attachment;
-  useEffect(() => {
+	const handleButton = () => {
+		setSubscribe(!subscribe);
+		axios.post(`https://6007-221-148-180-175.ngrok.io/subscribe`,{issue:issueId})
+	}
+	const handleApply = () => {
+		
+		//axios.post(`https://6007-221-148-180-175.ngrok.io/subscribe`,{issue:issueId})
+	}
+	function check(element) {
+		console.log(element);
+		for (let i = 0; i < element.length; i++){
+			console.log(element[i].subscriber, name);
+      if (element[i].subscriber ==  name)return true
+		}
+		return false
+  }
+  function check2(element) {
+		console.log(element);
+		for (let i = 0; i < element.length; i++){
+			console.log(element[i].user, name);
+      if (element[i].user ==  name)return true
+		}
+		return false
+  }
+	useEffect(() => {
+		if (localStorage.getItem('user')) {
+    	const name = JSON.parse(localStorage.getItem('user')).name;
+			setName(name);
+			console.log(name, data.reporter)
+		}
+		//axios.get(https://6007-221-148-180-175.ngrok.io/project/1/board)
     axios.get(`https://6007-221-148-180-175.ngrok.io/issue/${issueId}/`)
       .then( (res) => {
-        setData(res.data);
-        console.log(res.data);
-      })
+				setData(res.data);
+				console.log(res.data?.project_id);
+				(res.data.reporter == name ? setOwner(true) : setOwner(false))
+				console.log("결과값체크", check(res.data.subscribe));
+				setSubscribe(check(res.data.subscribe))
+				setAsignee(check2(res.data.assignee))
+				setPid(res.data?.project_id);
+				axios.get(`https://6007-221-148-180-175.ngrok.io/project/${res.data?.project_id}/board`).then((res)=>{setStatus(res.data);})
+			}).then(res => {
+				console.log("viewissue확인",Pid);
+				setLoading(false);
+				
+			})
       .catch((err) => {
         console.log(err);
-      });
-  }, []);
-  return (
+			});
+		
+	}, [data.reporter]);
+	
+	
+	if (loading) return <div style={{ textAlign: 'center' }}><AsteroidLoadingSpinner style={{margin:'auto'}}  /></div>;
+	return (
+	<>
+		{(loading )? <AsteroidLoadingSpinner/>:
     <>
-      
-      <MainHeader />
+      {/* <MainHeader /> */}
       <StyledLayout >
 				<StyledHeader />
 				<Layout>
@@ -107,24 +167,32 @@ const ViewIssue = () => {
 						<div style={{marginTop:"1rem"}}>
 							{attach && attach.map((item, index) => { console.log(item.image); return(<ImageLink onClick={() => window.open(item.image, '_blank')}>{`첨부파일${index+1}`}</ImageLink>)})}
 						</div>
-						<Testview /> 
+						<Testview setLoaing={setLoading} /> 
 					</StyledContent>
-					<StyledSider>
-							<SiderWrapper>
+							<StyledSider>
+								<SiderWrapper>
+									{owner?(assignee?<div><SelectButton onClick={handleApply}>변경 적용</SelectButton></div>:<></>):
+									<SelectButton subscribe onClick={handleButton}>{subscribe ? <Button shape="circle" icon={<BellTwoTone twoToneColor="#d3cf53" />}></Button> :
+													<Button shape="circle" icon={<BellTwoTone twoToneColor="grey" />}></Button>}
+										{subscribe ? `구독취소` : `구독하기`}
+									</SelectButton>
+									}
 								<SiderItemWrapper>
 									<StyledItem>
 										<div>카테고리</div>
-										<Select defaultValue={"프론트"} disabled >
-											{/* {CategoryData.map(province => (
+										{/* <Select defaultValue={data.responsibleIssue} disabled >
+											{CategoryData.map(province => (
 												<Option key={province}>{province}</Option>
-											))} */}
-										</Select>
+											))}
+										</Select> */}
+									<div>{data.responsibleIssue}</div>
 									</StyledItem>
 
 									<StyledItem >
 										<div>담당자</div>
 										{/* assignee.filter(a => a.mension === false).map(a=>a.user+" "); */}
-									<div>{data.assignee?.filter(a => a.mension === false).map(a => a.user + " ")}</div>
+									<div style={{fontWeight:'bold'}}>{data.assignee?.filter(a => a.mension === false).map(a => a.user + " ")}</div>
+									<div>{data.assignee?.filter(a => a.mension === true).map(a => a.user + " ")}</div>
 									</StyledItem>
 							
 									<StyledItem >
@@ -138,8 +206,17 @@ const ViewIssue = () => {
 										<div>예상 기한</div>
 										{data.deadline}
 									</StyledItem>
-							
-									<StyledItem >
+										<StyledItem >
+											<div>진행 단계</div>
+											{assignee ? <Select defaultValue={data.state}>
+											{status.map(s => (
+												<Option key={s.board_id}>{s.state}</Option>
+											))}
+										</Select> : <>{data.state}</>}
+										
+										</StyledItem>
+										
+									{/* <StyledItem >
 										<div>비슷한 이슈</div>
 										<Select
 											showSearch
@@ -153,19 +230,18 @@ const ViewIssue = () => {
 											<Option value="lucy">Lucy</Option>
 											<Option value="tom">Tom</Option>
 										</Select>
-									</StyledItem>
+								</StyledItem> */}
+								{/* {!owner ? <>
 									<StyledItem style={{ marginBottom: '2rem' }}>
 										<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 											<div>구독하기</div>
-											{/* {subscribe ? <Button onClick={handleButton} shape="circle" icon={<BellTwoTone twoToneColor="#d3cf53" />}></Button> :
-												<Button onClick={handleButton} shape="circle" icon={<BellTwoTone twoToneColor="grey" />}></Button>} */}
-										</div>
+												{subscribe ? <Button onClick={handleButton} shape="circle" icon={<BellTwoTone twoToneColor="#d3cf53" />}></Button> :
+													<Button onClick={handleButton} shape="circle" icon={<BellTwoTone twoToneColor="grey" />}></Button>}
+											</div>
 									</StyledItem>
-									
+								</> : <></>} */}
 								</SiderItemWrapper>
-									{/* <SelectButton >
-        이슈 등록
-      </SelectButton> */}
+									
 							</SiderWrapper>
 							
 						</StyledSider>
@@ -173,7 +249,9 @@ const ViewIssue = () => {
 				<StyledFooter />
       </StyledLayout>
       
-    </>
-  )
+	</>
+	}
+  </>)
 }
-export default ViewIssue;
+const MemoViewIssue = memo(ViewIssue);
+export default MemoViewIssue;

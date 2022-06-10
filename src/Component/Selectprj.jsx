@@ -4,12 +4,10 @@ import axios from 'axios';
 import useAsync from './useAsync';
 import React, { useState } from 'react';
 import CreatePrj from './Createprj';
-import Header from './header';
+// import Header from './header';
 import { Link } from 'react-router-dom';
 import AsteroidLoadingSpinner from 'asteroid-loading-spinner'
-import { SetRecoilState } from 'recoil';
-import {aprojectid} from '../Recoil/atoms';
-import { useRecoilState } from 'recoil';
+
 const { Meta } = Card;
 const StyledCard = styled(Card)`
 	padding: 1rem;
@@ -69,7 +67,7 @@ const ProjectSelect = () => {
 	return (
 		<>
 			{projects?.length > 0? <>
-			<Header/>
+			{/* <Header/> */}
 			<Wrapper>
 				<Title>프로젝트 선택</Title>
 				{/* <Link to="/Project/create"> */}

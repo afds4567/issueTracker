@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams,useNavigate } from 'react-router-dom';
 import { useRecoilState } from "recoil";
 import axios from 'axios';
-import MainHeader from "../header";
+// import MainHeader from "../header";
 import styled from "styled-components";
 import { BellTwoTone} from '@ant-design/icons';
 import { Layout ,Avatar, Tag, Input,Form, DatePicker, Select,Button} from 'antd';
@@ -186,13 +186,14 @@ const CreateIssue = () => {
 			await setCities(OwnerData[firstCity]);
 		}
 		async function fetchboard() {
-			const { data } = await axios.get(`https://6007-221-148-180-175.ngrok.io/project/${projectId}/boardList`);
+			const { data } = await axios.get(`https://6007-221-148-180-175.ngrok.io/project/${projectId}/board`);
+			console.log("board",data)
 			const tar = (data.find(item => item.order == 1));
 			setBoardid(tar.board_id);
 		}
    fetchAndSetUser(); 
 		fetchboard();
-},[ ]);
+},[]);
 	const [reporter,setReporter] = useState('');
 	const [CategoryData, setCategoryData] = useState([]);
 	const [title, setTitle] = useState("");
@@ -229,26 +230,18 @@ const CreateIssue = () => {
 	}
 	const handleButton = () => {
 		setSubscribe(!subscribe);
-		console.log(CategoryData[0]);
-		console.log(title);
-		console.log(content);
-		console.log(firstCity);
-		console.log(secondCity);
-		console.log(typeof (secondCity));
-		console.log(priority);
-		console.log(date);
 	}
-	const upload=(e)=> {
-    e.preventDefault();
-    let dataforms = new FormData();
-    dataforms.append("reporter", reporter);
+	const upload = (e) => {
+		e.preventDefault();
+		let dataforms = new FormData();
+		dataforms.append("reporter", reporter);
 		dataforms.append("board", boardid);
 		dataforms.append("responsibleIssue", firstCity);
 		dataforms.append("assignee[0]user", secondCity);
-    dataforms.append("deadline", date);
+		dataforms.append("deadline", date);
 		dataforms.append("title", title);
 		// axios.post(`https://6007-221-148-180-175.ngrok.io/issue/`, dataforms)
-    // //   .then(res => console.log("응답",...res));
+		// //   .then(res => console.log("응답",...res));
 		var t = "";
 		if (priority === "긴급") {
 			t = "F";
@@ -256,26 +249,33 @@ const CreateIssue = () => {
 			t = "M";
 		}
 		else if (priority === "여유") {
-			t="S";
+			t = "S";
 		}
-		dataforms.append("priority",t );
-    dataforms.append("content", content);
-    for (let index = 0; index < attach.length; index++) {
-      console.log(attach[index]);
-      dataforms.append("image", attach[index]);
-    }
-    dataforms.forEach((value, key) => {
+		dataforms.append("priority", t);
+		dataforms.append("content", content);
+		for (let index = 0; index < attach.length; index++) {
+			console.log(attach[index]);
+			dataforms.append("image", attach[index]);
+		}
+		dataforms.forEach((value, key) => {
 			console.log("key %s: value %s", key, value);
 			
 		});
+		
 		axios.post(`https://6007-221-148-180-175.ngrok.io/issue/`, dataforms)
-      .then(res => console.log("응답",...res));
+			.then(res => {
+				axios.post('https://6007-221-148-180-175.ngrok.io/slack/dm', { username: secondCity, state: "이슈를 할당했습니다" })
+					.then(res => res.status == 200 ? navigate(-1) : window.alert("dm 전송 실패"))
+					.catch((e) => { window.alert(e) });
+			})
+			.catch((e) => {
+				window.alert(e);
+			})
 		console.log(dataforms);
-  
   }
 		return (
 			<>
-				<MainHeader />
+				{/* <MainHeader /> */}
 			
 				<StyledLayout >
 					<StyledHeader />

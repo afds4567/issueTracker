@@ -1,11 +1,11 @@
-import React,{ useState, useEffect } from "react";
-import Header from "../header";
+import React,{ useState, useEffect,memo } from "react";
+// import Header from "../header";
 import AsteroidLoadingSpinner from 'asteroid-loading-spinner'
 import { DragDropContext, Droppable} from "react-beautiful-dnd";
 import styled from "styled-components";
 import Column from "./Column";
 import axios from 'axios';
-import { atom, selector, useRecoilValue,useRecoilState } from 'recoil';
+import {useRecoilState } from 'recoil';
 import {aprojectid} from '../../Recoil/atoms';
 import { useNavigate, useParams } from "react-router-dom";
 const Container = styled.div`
@@ -23,7 +23,9 @@ const StickyBar = styled.div`
 	background-color:#ea8685;
 `
 const Board = () => {
+	
 	const params = useParams();
+	const [autherror, setAutherror] = useState(true);
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -59,7 +61,7 @@ const Board = () => {
 		if (PID == 0) { setPID(params.projectId); } ;
 		fetchData();
 		console.log(PID);
-	}, []);
+	}, [autherror]);
 
   if (loading) return <div style={{ textAlign: 'center' }}><AsteroidLoadingSpinner style={{margin:'auto'}}  /></div>;
   if (error) return <div>에러가 발생했습니다</div>;
@@ -100,12 +102,22 @@ const Board = () => {
 		setData([...temp]);
 		console.log("도착칼럼", destination.droppableId);
 		console.log("item check", item);
-		axios.patch(`https://6007-221-148-180-175.ngrok.io/issue/${item.issue_id}/`, { board :destinationBoardId })
+		axios.patch(`https://6007-221-148-180-175.ngrok.io/issue/${item.issue_id}/`, { board: destinationBoardId })
+			.then(res => {
+				console.log("res결과",res.status);
+				
+			})
+			.catch(error => {
+				console.log(error);
+				
+				window.alert("진행 단계를 변경할 권한이 없습니다!!!!!!!!!!")
+				setAutherror(!autherror);
+		})
 		console.log("확인", data);	
 	}
 	return (
 		<>
-			<Header />
+			{/* <Header /> */}
 			<div style={{ padding: "0.5rem 8rem",backgroundColor:"#f7d794" }}>
 			<div style={{ display:"flex", margin:"8px"  }}>
 				{data.map((id, index) => {
@@ -137,5 +149,5 @@ const Board = () => {
 		</>
 	);
 };
-
-export default Board;
+const MeBoard = memo(Board);
+export default MeBoard;

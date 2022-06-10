@@ -3,14 +3,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Highlighter from "react-highlight-words";
 import { SearchOutlined } from '@ant-design/icons';
-import Header from './header';
+// import Header from './header';
 import AsteroidLoadingSpinner from 'asteroid-loading-spinner'
 import { useRecoilValue,useRecoilState } from 'recoil';
 import {isLoggedInRecoil} from '../Recoil/atoms';
 import axios from "axios";
 import useAsync from './useAsync';
 import { aprojectid } from '../Recoil/atoms';
-
+import "./row.css"
 async function getIssue(projectId) {
   
   const response = await axios.get(
@@ -18,7 +18,8 @@ async function getIssue(projectId) {
     //'https://6e54f48d-b34e-497e-bf72-69aaffd4d747.mock.pstmn.io'
   )
   var issues = [];
-  response.data.boards.map((i) => (i.issue.map((j) => { j['status'] = i.title; issues.push(j); })));
+  //response.data.boards.map((i) => (i.issue.map((j) => { j['status'] = i.state; issues.push(j); })));
+  response.data.boards.map((i) => (i.issue.map((j) => { j['status'] = i.state; issues.push(j); })));
   console.log(issues);
   return issues;
 }
@@ -190,6 +191,13 @@ const List = () => {
       sorter: (a, b) => a.deadline.localeCompare(b.deadline),
       defaultSortOrder: 'descend',
     },
+    {
+    title: '진행상태',
+    dataIndex: 'status',
+      key: 'status',
+    sortDirections: ['ascend', 'descend', 'ascend'],
+    sorter: (a, b) => (a.board-b.board ),
+  }
     // {
     //   title: '생성일',
     //   dataIndex: '생성일',
@@ -228,7 +236,7 @@ const List = () => {
       
       {data.length > 0 ?
         <>
-      <Header/>
+      {/* <Header/> */}
       <div style={{ padding: "3rem 8rem" }}>
         <h1>이슈 리스트</h1>
         <Table
@@ -243,6 +251,7 @@ const List = () => {
           dataSource={data}
           total={data.length}
           rowKey={record => record.issue_id}
+          rowClassName={(record, index) => (record.board.status==='열림'?'red':(record.board.order>4?'green':null))}
           onRow={(record) => {
             return {
             onDoubleClick: () => {
