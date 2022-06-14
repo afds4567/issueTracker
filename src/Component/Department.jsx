@@ -39,6 +39,12 @@ const Department = (props) => {
   const user = useRecoilValue(_user);
   const [login,setLogin] = useRecoilState(isLoggedInRecoil)
   const navigate = useNavigate();
+  useEffect(() => {
+    if (login) {
+      console.log(login); navigate('/project');
+    }
+  }, [login])
+  
   //등록 버튼 눌렀을 때 실행
   const onFinish = (values) => {
     const updateData = { "email": email };
@@ -53,20 +59,26 @@ const Department = (props) => {
     .then(response => {
       console.log(response.data, "회원등록성공~ /signUp 성공");
       axios.post('https://6007-221-148-180-175.ngrok.io/token/', {username:user.user_id  })
-      .then(res => {
-        console.log(response.data, "access refreshtoken 최초 발급 성공");
-        if (res.status == 201 || res.status == 200) {
-          onLoginSuccess();
-          navigate(`/project`);
+        .then(res => {
+          console.log("57번줄",res.data.access_token);
+          console.log(res.data, "access refreshtoken 최초 발급 성공");
+          if (res.status == 201 || res.status == 200) {
+            console.log("if문 내부", res.status)
+            console.log("엑세스토큰",res.data.access_token)
+            axios.defaults.headers.common['Authorization'] = "JWT " + res.data.access_token;
+            onLoginSuccess(res);setLogin(true);
+            //(axios.defaults.headers.common['Authorization'] = "JWT " + res.data.access_token);
         }
         else if (res.status === 202) {
           console.log(res);
           window.alert("이미 DB에 존재 로그인에 실패하였습니다.");
       }
-      })
+        })
+      
     })
-    setLogin(true);
-    navigate('/project');
+    window.alert("로그인 성공")
+    
+    // navigate('/project');
   }
   const onFinishFailed = (errorInfo) => {
     console.log("Failed:", errorInfo);

@@ -2,7 +2,7 @@ import { Card, Avatar,Button,Modal } from 'antd';
 import styled from "styled-components"
 import axios from 'axios';
 import useAsync from './useAsync';
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import CreatePrj from './Createprj';
 // import Header from './header';
 import { Link } from 'react-router-dom';
@@ -45,8 +45,9 @@ async function getProjects() {
   return response.data;
 }
 const ProjectSelect = () => {
-	const [state] = useAsync(getProjects, []);
-	const {  data: projects,  } = state
+	//const [state,fetchData] = useAsync(getProjects, []);
+	const [projects, setProjects] = useState([]);
+	//const {  data: projects,  } = state
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const changeModal = () => {
 		setIsModalVisible(false);
@@ -64,6 +65,22 @@ const ProjectSelect = () => {
 	const handleProjectSelect = (id) => {
 		//setprojectId(id);
 	}
+	useEffect(() => {
+		if (window.localStorage.getItem("token")) {
+			const access_token =JSON.parse(window.localStorage.getItem("token")).access_token;
+			axios.defaults.headers.common['Authorization'] = "JWT " + access_token;
+			const response = axios.get('https://6007-221-148-180-175.ngrok.io/project')
+				.then(res => { setProjects(res.data);console.log(res.data) })
+			console.log("dat실행")
+			//setProjects(response);
+			// console.log(response);
+			// console.log("selectp", response.data);
+		}
+		axios.get('https://6007-221-148-180-175.ngrok.io/project')
+				.then(res => { setProjects(res.data);console.log(res.data) })
+			console.log("dat실행")
+	}, [])
+	
 	return (
 		<>
 			{projects?.length > 0? <>

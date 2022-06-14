@@ -254,7 +254,7 @@ const List = () => {
           rowClassName={(record, index) => (record.board.status==='열림'?'red':(record.board.order>4?'green':null))}
           onRow={(record) => {
             return {
-            onDoubleClick: () => {
+            onClick: () => {
               navigate(`/issue/${record.issue_id}`);
               // setActiveRecord(record);
               // setIsModalVisible(true);

@@ -36,7 +36,10 @@ function Task(props) {
                     ref={provided.innerRef}
                     isDragging={snapshot.isDragging}
                 >
-                    {props.task.title}
+                <div style={{ display:"flex",justifyContent:"space-between",margin:"8px"}}>
+                        <div>{props.task.title}</div>
+                        
+                </div>
                 </Container>
             )}
         </Draggable>

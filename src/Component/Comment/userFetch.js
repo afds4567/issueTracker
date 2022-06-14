@@ -5,7 +5,7 @@ async function getUserInfo() {
     `https://6007-221-148-180-175.ngrok.io/user/`
   );
   var users = [];
-  response.data.map(i => { i.display = "testdisplay";
+  response.data.map(i => { i.display = i.name;
           i.id=i.username;})
   users.push(response.data);
   
@@ -42,3 +42,7 @@ export async function getResponsibility() {
   console.log(CategoryData,OwnerData);
  return [CategoryData,OwnerData];
 }
+
+
+
+

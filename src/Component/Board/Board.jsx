@@ -1,5 +1,4 @@
 import React,{ useState, useEffect,memo } from "react";
-// import Header from "../header";
 import AsteroidLoadingSpinner from 'asteroid-loading-spinner'
 import { DragDropContext, Droppable} from "react-beautiful-dnd";
 import styled from "styled-components";
@@ -11,19 +10,7 @@ import { useNavigate, useParams } from "react-router-dom";
 const Container = styled.div`
   display : flex;
 `
-const StickyBar = styled.div`
-	margin: 8px;
-	padding: 8px;
-	//border: 1px solid lightgrey;
-	font-weight: bold;
-	border-radius: 2px;
-	width:100%;
-	display:flex;
-	flex-direction: column;
-	background-color:#ea8685;
-`
 const Board = () => {
-	
 	const params = useParams();
 	const [autherror, setAutherror] = useState(true);
 	const [data, setData] = useState(null);
@@ -31,27 +18,19 @@ const Board = () => {
 	const [error, setError] = useState(null);
 	const [PID, setPID] = useRecoilState(aprojectid);
 	const navigate = useNavigate();
-	//const PID = useRecoilValue(aprojectid);
 	useEffect(() => {
 		if (params.projectId < 1 || params.projectId =='undefined') {
 			window.alert("프로젝트를 선택해주세요");
 			navigate("/project");
 		}
 		const fetchData = async () => {
-			
 			try {
-				// 요청이 시작 할 때에는 error 와 users 를 초기화하고
 				setError(null);
 				setData(null);
-				// loading 상태를 true 로 바꿉니다.
 				setLoading(true);
-				console.log(PID);
-				console.log(params);
 				const response = await axios.get(
-					// 'https://6e54f48d-b34e-497e-bf72-69aaffd4d747.mock.pstmn.io/project/1'
 					`https://6007-221-148-180-175.ngrok.io/project/${params.projectId}/`
 				);
-				console.log(response.data.boards);
 				setData(response.data.boards); // 데이터는 response.data 안에 들어있습니다.
 			} catch (e) {
 				setError(e);
@@ -68,7 +47,7 @@ const Board = () => {
   if (!data) return null;
 	function handleOnDragEnd(result) {
 		console.log('result ? ', result);
-		const { destination,draggableId, source, type } = result;
+		const { destination, source} = result;
 		if (!destination) { return };
 		if (destination.droppableId === source.droppableId && destination.index === source.index) { return };
 		//If dropped inside the same column
@@ -94,7 +73,7 @@ const Board = () => {
 		startTasks.splice(source.index, 1);
 		const temp = data;
 		temp[source.droppableId - 1].issue = startTasks;
-		//Destination column 
+		//Destination column
 		const finishTasks = Array.from(data[destination.droppableId - 1].issue);
 		const destinationBoardId = data[destination.droppableId - 1].board_id;
 		finishTasks.splice(destination.index, 0, item);
@@ -105,11 +84,9 @@ const Board = () => {
 		axios.patch(`https://6007-221-148-180-175.ngrok.io/issue/${item.issue_id}/`, { board: destinationBoardId })
 			.then(res => {
 				console.log("res결과",res.status);
-				
 			})
 			.catch(error => {
 				console.log(error);
-				
 				window.alert("진행 단계를 변경할 권한이 없습니다!!!!!!!!!!")
 				setAutherror(!autherror);
 		})
@@ -117,34 +94,28 @@ const Board = () => {
 	}
 	return (
 		<>
-			{/* <Header /> */}
-			<div style={{ padding: "0.5rem 8rem",backgroundColor:"#f7d794" }}>
-			<div style={{ display:"flex", margin:"8px"  }}>
-				{data.map((id, index) => {
-					return <StickyBar key={index}>{id.state}</StickyBar>
-				 })}
+			<div style={{ minHeight: "100vh", height: "auto", backgroundColor: "#ffdd59", padding: "3rem 8rem" }}>
+				<div style={{ display:"flex",justifyContent:"space-between",margin:"8px"}}>
+					<h1>칸반 보드</h1>
 				</div>
-			</div>
-			<hr/>
-			<div style={{ height:"100vh",backgroundColor:"#ffdd59",padding: "0rem 8rem" }}>
-				<div style={{padding:"1px 16px 1px"}}></div>
-			<DragDropContext onDragEnd={handleOnDragEnd}>
-				<Droppable droppableId="all-columns" direction='horizontal' type='column'>
-					{(provided) => (
-						<Container
-							{...provided.droppableProps}
-							ref={provided.innerRef}
-						>
-							{data.map((board, index) => {
-								const column = board;
-								const tasks = board.issue;
-								return <Column key={column.id} column={column} tasks={tasks} index={index} />
-							})}
-							{provided.placeholder}
-						</Container>
-					)}
-				</Droppable>
-			</DragDropContext>
+				<DragDropContext onDragEnd={handleOnDragEnd}>
+					<Droppable key={"column" }droppableId="all-columns" direction='horizontal' type='column'>
+						{(provided) => (
+							<Container
+								{...provided.droppableProps}
+								ref={provided.innerRef}
+							>
+								{data.map((board, index) => {
+									const column = board;
+									const tasks = board.issue;
+									return(
+									index !== 0 && index !== data.length-1 ? (<Column key={column.id} column={column} tasks={tasks} index={index} ></Column>):<></> )
+								})}
+								{provided.placeholder}
+							</Container>
+						)}
+					</Droppable>
+				</DragDropContext>
 			</div>
 		</>
 	);

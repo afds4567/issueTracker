@@ -207,7 +207,6 @@ const CreateIssue = () => {
 	const [secondCity, setSecondCity] = useState(null);
 	const [priorities, setPriorities] = useState(Priority);
 	const [priority, setPriority] = useState(priorities[0]);
-	//const [descript, setDescript] = useState("");
 	const [subscribe, setSubscribe] = useState(false);
   const onChange = e => {
 		//console.log('Change:', e.target.value);
@@ -261,16 +260,18 @@ const CreateIssue = () => {
 			console.log("key %s: value %s", key, value);
 			
 		});
-		
-		axios.post(`https://6007-221-148-180-175.ngrok.io/issue/`, dataforms)
-			.then(res => {
-				axios.post('https://6007-221-148-180-175.ngrok.io/slack/dm', { username: secondCity, state: "이슈를 할당했습니다" })
-					.then(res => res.status == 200 ? navigate(-1) : window.alert("dm 전송 실패"))
-					.catch((e) => { window.alert(e) });
-			})
-			.catch((e) => {
-				window.alert(e);
-			})
+		if (date == undefined) window.alert('예상기한을 입력해주세요');
+		else{
+			axios.post(`https://6007-221-148-180-175.ngrok.io/issue/`, dataforms)
+				.then(res => {
+					axios.post('https://6007-221-148-180-175.ngrok.io/slack/dm', { username: secondCity, state: "이슈를 할당했습니다" })
+						.then(res => res.status == 200 ? navigate(-1) : window.alert("dm 전송 실패"))
+						.catch((e) => { window.alert(e) });
+				})
+				.catch((e) => {
+					window.alert(e);
+				})
+			}
 		console.log(dataforms);
   }
 		return (
@@ -372,13 +373,7 @@ const CreateIssue = () => {
 											<Option value="tom">Tom</Option>
 										</Select>
 									</StyledItem>
-									<StyledItem style={{ marginBottom: '2rem' }}>
-										<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-											<div>구독하기</div>
-											{subscribe ? <Button onClick={handleButton} shape="circle" icon={<BellTwoTone twoToneColor="#d3cf53" />}></Button> :
-												<Button onClick={handleButton} shape="circle" icon={<BellTwoTone twoToneColor="grey" />}></Button>}
-										</div>
-									</StyledItem>
+									
 									
 								</SiderItemWrapper>
 									<SelectButton onClick={upload} >

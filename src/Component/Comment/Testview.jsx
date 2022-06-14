@@ -6,15 +6,18 @@ const Testview = (props) => {
 	//const IssueId = props.match.params.videoId;
 	const { issueId } = useParams();
 	const [Comments, setComments] = useState([]);
+	const [commentCnt, setCommentCnt] = useState(0);
 	useEffect(() => {
 		Axios
 			.get(`https://6007-221-148-180-175.ngrok.io/issue/${issueId}`)
 			.then((response) => {
 				setComments(response.data.comment);
 				console.log(response.data.comment);
-				//props.setLoading(false);
-				}	
-			)
+				const comments = response.data.comment;
+				const commentCount = comments.filter((com) => com.parent == null).length;
+				console.log(commentCount);
+				setCommentCnt(commentCount);
+			})	
 	},[])
 	const refreshFunction = (newComment) => {
 	// 자식컴포넌트에서 버튼을 클릭하면 자식에서 받아온 comment정보(새 댓글)를 newComment라고 한다.
@@ -29,6 +32,7 @@ const Testview = (props) => {
 				refreshFunction={refreshFunction}
 				commentLists={Comments}
 				IssueId={issueId}
+				commentCnt={commentCnt}
 				/>
 			</div>
 		</>

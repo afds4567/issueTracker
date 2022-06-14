@@ -21,7 +21,7 @@ const Header = () => {
 	const PID = useRecoilValue(aprojectid);
 	useEffect(() => {
 		setCurrent(pathname.substring(1));
-		
+		console.log(pathname);
 	}, [pathname]);
 	//모달창 부분
 	const [isModalVisible, setIsModalVisible] = useState(false);
@@ -40,6 +40,7 @@ const Header = () => {
 
 
 	return (
+		pathname  ==='/login'? <></> :
 		<HeaderWrapper style={{position: "sticky", backgroundColor: "#fff200", top:"0", zIndex:"999"}}>
 			<Menu selectedKeys={[current]} mode="horizontal" style={{position: "sticky", backgroundColor: "#fff200", top:"0"}}>
 				<Menu.Item key="board" icon={<AppstoreTwoTone />}>
@@ -70,7 +71,8 @@ const Header = () => {
 						<Department modal changeModal={changeModal} />
 					</Modal>
 			</Menu>
-		</HeaderWrapper>
+			</HeaderWrapper>
+		
 	);
 }
 const MemoHeader = memo(Header);

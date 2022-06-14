@@ -91,19 +91,28 @@ const ViewIssue = () => {
 	const [Pid, setPid] = useState(0);
 	const [name, setName] = useState("");
 	const [status, setStatus] = useState([]);
+	const [selectStatus, setSelectedStatus] = useState(0);
 	const [owner, setOwner] = useState(false);
 	const [subscribe, setSubscribe] = useState(false);
 	const [assignee, setAsignee] = useState(false);
 	const cont = (data.content);
 	const attach = data.attachment;
+	const onstatusChange = (v) => {
+		
+		setSelectedStatus(v);
+	}
 	const handleButton = () => {
 		setSubscribe(!subscribe);
 		axios.post(`https://6007-221-148-180-175.ngrok.io/subscribe`,{issue:issueId})
 	}
 	const handleApply = () => {
-		
+		axios.patch(`https://6007-221-148-180-175.ngrok.io/issue/${issueId}/`, { board: selectStatus })
+			.then((res) => { window.alert("진행 단계가 성공적으로 변경되었습니다"); })
+		//axios.get(`https://6007-221-148-180-175.ngrok.io/issue/${issueId}`).then(res=>console.log(res));
+		//console.log(res);
 		//axios.post(`https://6007-221-148-180-175.ngrok.io/subscribe`,{issue:issueId})
 	}
+	
 	function check(element) {
 		console.log(element);
 		for (let i = 0; i < element.length; i++){
@@ -159,11 +168,11 @@ const ViewIssue = () => {
 				<StyledHeader />
 				<Layout>
 					<StyledContent>
-						<div style={{ fontWeight: "bold",display:"flex",justifyContent:"space-between",alignItems:"center",caretColor: "transparent", cursor: "none", height: "50px" }}>
+						<div style={{ fontWeight: "bold",display:"flex",justifyContent:"space-between",alignItems:"center",caretColor: "transparent", cursor: "default", height: "50px" }}>
 							<div style={{display:"inline", float:"right"}}>{data.title}</div>
 							<WriterWrapper style={{float:"left"}}><div style={{ fontWeight: "bold" }}>Created by</div><Avatar style={{ padding: "3px", marginLeft: "10px" }} src="https://joeschmoe.io/api/v1/random" /> {data.reporter}</WriterWrapper>
 						</div>
-						<div dangerouslySetInnerHTML={ {__html: cont} } style={{ caretColor: "transparent", cursor:"none", height: "200px", border: "1px solid black" }}></div>
+						<div dangerouslySetInnerHTML={ {__html: cont} } style={{paddingTop:"1rem", caretColor: "transparent", cursor:"default", height: "200px", border: "1px solid black" }}></div>
 						<div style={{marginTop:"1rem"}}>
 							{attach && attach.map((item, index) => { console.log(item.image); return(<ImageLink onClick={() => window.open(item.image, '_blank')}>{`첨부파일${index+1}`}</ImageLink>)})}
 						</div>
@@ -180,11 +189,7 @@ const ViewIssue = () => {
 								<SiderItemWrapper>
 									<StyledItem>
 										<div>카테고리</div>
-										{/* <Select defaultValue={data.responsibleIssue} disabled >
-											{CategoryData.map(province => (
-												<Option key={province}>{province}</Option>
-											))}
-										</Select> */}
+										
 									<div>{data.responsibleIssue}</div>
 									</StyledItem>
 
@@ -208,7 +213,7 @@ const ViewIssue = () => {
 									</StyledItem>
 										<StyledItem >
 											<div>진행 단계</div>
-											{assignee ? <Select defaultValue={data.state}>
+											{assignee ? <Select defaultValue={data.state} onChange={onstatusChange}> 
 											{status.map(s => (
 												<Option key={s.board_id}>{s.state}</Option>
 											))}
@@ -216,30 +221,7 @@ const ViewIssue = () => {
 										
 										</StyledItem>
 										
-									{/* <StyledItem >
-										<div>비슷한 이슈</div>
-										<Select
-											showSearch
-											placeholder="다른 이슈 검색"
-											optionFilterProp="children"
-											filterOption={(input, option) =>
-												option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-											}
-										>
-											<Option value="jack">Jack</Option>
-											<Option value="lucy">Lucy</Option>
-											<Option value="tom">Tom</Option>
-										</Select>
-								</StyledItem> */}
-								{/* {!owner ? <>
-									<StyledItem style={{ marginBottom: '2rem' }}>
-										<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-											<div>구독하기</div>
-												{subscribe ? <Button onClick={handleButton} shape="circle" icon={<BellTwoTone twoToneColor="#d3cf53" />}></Button> :
-													<Button onClick={handleButton} shape="circle" icon={<BellTwoTone twoToneColor="grey" />}></Button>}
-											</div>
-									</StyledItem>
-								</> : <></>} */}
+									
 								</SiderItemWrapper>
 									
 							</SiderWrapper>

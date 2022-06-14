@@ -29,7 +29,7 @@ function Commentcomponent(props) {
   const user = useRecoilValue(_user);
   const IssueId = props.IssueId;
   const [data] = useAsync(() => getUserInfo(), []);
-  console.log(data);
+  console.log(data.data);
   const [state, setState] = useState({
     value: "",
     mentionData: null,
@@ -45,6 +45,7 @@ function Commentcomponent(props) {
   //   }
   // )();
   // }, );
+  const [ChildCommentNumber, setChildCommentNumber] = useState(0);
   const [comment, setComment] = useState('');
   const [mentionList, setMentionList] = useState([]);
   const [commentValue, setCommentValue] = useState("");
@@ -113,7 +114,7 @@ function Commentcomponent(props) {
           
           <Mention
             trigger="@"
-            data={data.data[0]}
+            data={[...data.data[0]]}
             //renderSuggestion={renderSuggestion}
             onAdd={onAdd}
             className="mentions__mention"
@@ -127,10 +128,14 @@ function Commentcomponent(props) {
           </SelectButton>
         </ButtonWrapper>
       </div>}
-        {/* Comment Lists */}
+      {/* Comment Lists */}
+      <div style={{display:'flex'}}>
       <SelectButton onClick={onClickReplyOpen} key="comment-basic-reply-to">
         댓글 펼치기
       </SelectButton>
+      {<div style={{ marginTop:'auto', marginLeft:'1rem', fontSize: '14px',  color: 'gray',bottom:'0px' }} >View {props.commentCnt} more comment (s) </div>    
+        }
+        </div>
       <hr />
       {OpenReply && props.commentLists && props.commentLists.map((comment, index) => (
         (!comment.parent &&
